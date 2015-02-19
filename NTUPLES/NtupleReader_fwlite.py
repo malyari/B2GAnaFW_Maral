@@ -94,7 +94,7 @@ parser.add_option('--mAK8TrimmedCut', type='float', action='store',
                   help='Trimmed mass Cut for CMS Combined Tagger')
 
 parser.add_option('--tau32Cut', type='float', action='store',
-                  default=100.,
+                  default=0.6,
                   dest='tau32Cut',
                   help='Tau3 / Tau2 n-subjettiness cut for CMS Combined Tagger')
 
@@ -269,6 +269,35 @@ h_jetsAK8nSubJets = Handle("std::vector<float>")
 l_jetsAK8nSubJets = ("jetsAK8", "jetAK8nSubJets" )
 h_jetsAK8minmass = Handle("std::vector<float>")
 l_jetsAK8minmass = ("jetsAK8", "jetAK8minmass" )
+
+h_jetsAK8VSubjetIndex0 = Handle("std::vector<float>")
+l_jetsAK8VSubjetIndex0 = ("jetsAK8", "jetAK8vSubjetIndex0")
+h_jetsAK8VSubjetIndex1 = Handle("std::vector<float>")
+l_jetsAK8VSubjetIndex1 = ("jetsAK8", "jetAK8vSubjetIndex1")
+
+h_jetsAK8TopSubjetIndex0 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex0 = ("jetsAK8", "jetAK8topSubjetIndex0")
+h_jetsAK8TopSubjetIndex1 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex1 = ("jetsAK8", "jetAK8topSubjetIndex1")
+h_jetsAK8TopSubjetIndex2 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex2 = ("jetsAK8", "jetAK8topSubjetIndex2")
+h_jetsAK8TopSubjetIndex3 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex3 = ("jetsAK8", "jetAK8topSubjetIndex3")
+
+
+
+h_subjetsAK8BDisc = Handle( "std::vector<float>")
+l_subjetsAK8BDisc = ("subjetsCmsTopTag", "subjetsCmsTopTagsubjetCSVV1")
+h_subjetsAK8Pt = Handle( "std::vector<float>")
+l_subjetsAK8Pt = ("subjetsCmsTopTag", "subjetsCmsTopTagPt")
+h_subjetsAK8Eta = Handle( "std::vector<float>")
+l_subjetsAK8Eta = ("subjetsCmsTopTag", "subjetsCmsTopTagEta")
+h_subjetsAK8Phi = Handle( "std::vector<float>")
+l_subjetsAK8Phi = ("subjetsCmsTopTag", "subjetsCmsTopTagPhi")
+h_subjetsAK8Mass = Handle( "std::vector<float>")
+l_subjetsAK8Mass = ("subjetsCmsTopTag", "subjetsCmsTopTagMass")
+
+
 
 #HISTOGRAMS
 
@@ -816,6 +845,15 @@ for ifile in files :
         event.getByLabel ( l_jetsAK8nSubJets, h_jetsAK8nSubJets )
         event.getByLabel ( l_jetsAK8minmass, h_jetsAK8minmass )
 
+        event.getByLabel ( l_jetsAK8TopSubjetIndex0, h_jetsAK8TopSubjetIndex0 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex1, h_jetsAK8TopSubjetIndex1 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex2, h_jetsAK8TopSubjetIndex2 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex3, h_jetsAK8TopSubjetIndex3 )
+
+        event.getByLabel ( l_subjetsAK8BDisc, h_subjetsAK8BDisc)
+        event.getByLabel ( l_subjetsAK8Pt, h_subjetsAK8Pt)
+        event.getByLabel ( l_subjetsAK8Eta, h_subjetsAK8Eta)
+        event.getByLabel ( l_subjetsAK8Phi, h_subjetsAK8Phi)
         
         ak8JetsGood = []
         ak8JetsGoodTrimMass = []
@@ -826,6 +864,11 @@ for ifile in files :
         ak8JetsGoodTau3 = []
         ak8JetsGoodNSubJets = []
         ak8JetsGoodMinMass = []
+        ak8JetsGoodTopSubjetIndex0 = []
+        ak8JetsGoodTopSubjetIndex1 = []
+        ak8JetsGoodTopSubjetIndex2 = []
+        ak8JetsGoodTopSubjetIndex3 = []
+
 
         if len( h_jetsAK8Pt.product()) > 0 : 
             AK8Pt = h_jetsAK8Pt.product()
@@ -847,9 +890,24 @@ for ifile in files :
             AK8Tau3 = h_jetsAK8Tau3.product()
             AK8nSubJets = h_jetsAK8nSubJets.product()
             AK8minmass = h_jetsAK8minmass.product()
+            AK8TopSubjetIndex0 = h_jetsAK8TopSubjetIndex0.product()
+            AK8TopSubjetIndex1 = h_jetsAK8TopSubjetIndex1.product()
+            AK8TopSubjetIndex2 = h_jetsAK8TopSubjetIndex2.product()
+            AK8TopSubjetIndex3 = h_jetsAK8TopSubjetIndex3.product()
 
 
+            
+        ak8SubJetsBDisc = []
+        ak8SubJetsPt = []
+        ak8SubJetsEta = []
+        ak8SubJetsPhi = []
         
+        if len( h_subjetsAK8BDisc.product() ) > 0 : 
+            AK8SubJetsBDisc = h_subjetsAK8BDisc.product()
+            AK8SubJetsPt = h_subjetsAK8Pt.product()
+            AK8SubJetsEta = h_subjetsAK8Eta.product()
+            AK8SubJetsPhi = h_subjetsAK8Phi.product()
+            
         
         for i in range(0,len(AK8Pt)):
 
@@ -889,6 +947,12 @@ for ifile in files :
                 ak8JetsGoodTau3.append( AK8Tau3[i])
                 ak8JetsGoodNSubJets.append( AK8nSubJets[i])
                 ak8JetsGoodMinMass.append( AK8minmass[i] )
+                ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
+                ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
+                ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
+                ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )
+                                                                                             
+
 
         #Tagging
         if len(ak8JetsGood) < 1 :
@@ -936,17 +1000,87 @@ for ifile in files :
             h_minmassAK8.Fill( ak8JetsGoodMinMass[i] )
             h_nsjAK8.Fill( ak8JetsGoodNSubJets[i] )
 
-            
-            if options.verbose : 
-                print 'minMass = {0:6.2f}, trimmed mass = {1:6.2f}, tau32 = {2:6.2f}'.format(
+            sbdisc0 = -1.
+            sbdisc1 = -1.
+            sbdisc2 = -1.
+            sbdisc3 = -1.
+            spt0 = -1.
+            spt1 = -1.
+            spt2 = -1.
+            spt3 = -1.
+            seta0 = -1.
+            seta1 = -1.
+            seta2 = -1.
+            seta3 = -1.
+            sphi0 = -1.
+            sphi1 = -1.
+            sphi2 = -1.
+            sphi3 = -1.            
+
+            if ak8JetsGoodTopSubjetIndex0[i] > -1 :
+                sbdisc0 = AK8SubJetsBDisc[ int(ak8JetsGoodTopSubjetIndex0[i]) ]
+                spt0    = AK8SubJetsPt[ int(ak8JetsGoodTopSubjetIndex0[i]) ]
+                seta0   = AK8SubJetsEta[ int(ak8JetsGoodTopSubjetIndex0[i]) ]
+                sphi0   = AK8SubJetsPhi[ int(ak8JetsGoodTopSubjetIndex0[i]) ]
+
+            if ak8JetsGoodTopSubjetIndex1[i] > -1 :
+                sbdisc1 = AK8SubJetsBDisc[ int(ak8JetsGoodTopSubjetIndex1[i]) ]
+                spt1    = AK8SubJetsPt[ int(ak8JetsGoodTopSubjetIndex1[i]) ]
+                seta1   = AK8SubJetsEta[ int(ak8JetsGoodTopSubjetIndex1[i]) ]
+                sphi1   = AK8SubJetsPhi[ int(ak8JetsGoodTopSubjetIndex1[i]) ]
+
+            if ak8JetsGoodTopSubjetIndex2[i] > -1 :
+                sbdisc2 = AK8SubJetsBDisc[ int(ak8JetsGoodTopSubjetIndex2[i]) ]
+                spt2    = AK8SubJetsPt[ int(ak8JetsGoodTopSubjetIndex2[i]) ]
+                seta2   = AK8SubJetsEta[ int(ak8JetsGoodTopSubjetIndex2[i]) ]
+                sphi2   = AK8SubJetsPhi[ int(ak8JetsGoodTopSubjetIndex2[i]) ]
+
+            if ak8JetsGoodTopSubjetIndex3[i] > -1 :
+                sbdisc3 = AK8SubJetsBDisc[ int(ak8JetsGoodTopSubjetIndex3[i]) ]
+                spt3    = AK8SubJetsPt[ int(ak8JetsGoodTopSubjetIndex3[i]) ]
+                seta3   = AK8SubJetsEta[ int(ak8JetsGoodTopSubjetIndex3[i]) ]
+                sphi3   = AK8SubJetsPhi[ int(ak8JetsGoodTopSubjetIndex3[i]) ]
+                
+                
+            if options.verbose :
+
+                print 'Top tag candidate : '
+                print '   top jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                    ak8JetsGood[i].Perp(), ak8JetsGood[i].Rapidity(), ak8JetsGood[i].Phi(), ak8JetsGood[i].M() )                 
+
+                
+                print '   Subjet indices : %6d %6d %6d %6d' % (ak8JetsGoodTopSubjetIndex0[i],
+                                                            ak8JetsGoodTopSubjetIndex1[i],
+                                                            ak8JetsGoodTopSubjetIndex2[i],
+                                                            ak8JetsGoodTopSubjetIndex3[i])
+
+                for index in [ak8JetsGoodTopSubjetIndex0[i],
+                              ak8JetsGoodTopSubjetIndex1[i],
+                              ak8JetsGoodTopSubjetIndex2[i],
+                              ak8JetsGoodTopSubjetIndex3[i] ] :
+                    if index > len(AK8SubJetsBDisc) :
+                        print "Problem! Subjet indices are wrong!"
+                        exit(1)
+
+
+                print '   -subjet0pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, B = {3:6.2f}'.format ( spt0,seta0,sphi0,sbdisc0 )
+                print '   -subjet1pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, B = {3:6.2f}'.format ( spt1,seta1,sphi1,sbdisc1 )
+                print '   -subjet2pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, B = {3:6.2f}'.format ( spt2,seta2,sphi2,sbdisc2 )
+                print '   -subjet3pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, B = {3:6.2f}'.format ( spt3,seta3,sphi3,sbdisc3 )                 
+
+
+
+
+                                
+                print '  minMass = {0:6.2f}, trimmed mass = {1:6.2f}, tau32 = {2:6.2f}'.format(
                     minMass, mAK8Trimmed, tau32
-                    ), 
+                    ),
             if minMass > options.minMassCut and mAK8Trimmed > options.mAK8TrimmedCut and tau32 < options.tau32Cut :
                 nttags += 1
                 tJets.append( ak8JetsGood[i] )
 
                 if options.verbose : 
-                    print ' --->Tagged jet!'
+                    print '  ------>Tagged jet!'
             else :
                 if options.verbose : 
                     print ''
