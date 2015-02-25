@@ -1,0 +1,5 @@
+/eos/uscms/store/user/rappocc/ZPrimeToTTJets_M2000GeV_W20GeV_Tune4C_13TeV-madgraph-tauola/B2GAnaFW_PHYS14/150219_215500/0000/B2GEDMNtuple_1.root
+/eos/uscms/store/user/rappocc/ZPrimeToTTJets_M2000GeV_W20GeV_Tune4C_13TeV-madgraph-tauola/B2GAnaFW_PHYS14/150219_215500/0000/B2GEDMNtuple_2.root
+/eos/uscms/store/user/rappocc/ZPrimeToTTJets_M2000GeV_W20GeV_Tune4C_13TeV-madgraph-tauola/B2GAnaFW_PHYS14/150219_215500/0000/B2GEDMNtuple_3.root
+/eos/uscms/store/user/rappocc/ZPrimeToTTJets_M2000GeV_W20GeV_Tune4C_13TeV-madgraph-tauola/B2GAnaFW_PHYS14/150219_215500/0000/B2GEDMNtuple_4.root
+/eos/uscms/store/user/rappocc/ZPrimeToTTJets_M2000GeV_W20GeV_Tune4C_13TeV-madgraph-tauola/B2GAnaFW_PHYS14/150219_215500/0000/B2GEDMNtuple_5.root
