@@ -215,14 +215,10 @@ h_jetsAK4cMultip = Handle("std::vector<float>")
 l_jetsAK4cMultip = ("jetsAK4" , "jetAK4chargedMultiplicity")
 h_jetsAK4Y = Handle("std::vector<float>")
 l_jetsAK4Y = ("jetsAK4" , "jetAK4Y")
-h_jetsAK8Area = Handle("std::vector<float>")
-l_jetsAK8Area = ( "jetsAK8" , "jetAK8jetArea" )
 
-
+#Rho
 h_rho = Handle("double")
 l_rho = ("fixedGridRhoFastjetAll", "")
-
-#!!! ADD IN LEPTON KEYS AND VERTICE INFO
 
 #MET label and Handles
 h_metPt = Handle("std::vector<float>")
@@ -249,10 +245,8 @@ h_jetsAK8JEC = Handle("std::vector<float>")
 l_jetsAK8JEC = ("jetsAK8" , "jetAK8jecFactor0")
 h_jetsAK8Y = Handle("std::vector<float>")
 l_jetsAK8Y = ("jetsAK8" , "jetAK8Y")
-#h_jetsAK8CSV = Handle("std::vector<float>")
-#l_jetsAK8CSV = ("jetsAK8" , "jetAK8CSV")
-
-
+h_jetsAK8CSV = Handle("std::vector<float>")
+l_jetsAK8CSV = ("jetsAK8" , "jetAK8CSV")
 h_jetsAK8TrimMass = Handle("std::vector<float>")
 l_jetsAK8TrimMass = ("jetsAK8", "jetAK8trimmedMass" )
 h_jetsAK8PrunMass = Handle("std::vector<float>")
@@ -269,7 +263,8 @@ h_jetsAK8nSubJets = Handle("std::vector<float>")
 l_jetsAK8nSubJets = ("jetsAK8", "jetAK8nSubJets" )
 h_jetsAK8minmass = Handle("std::vector<float>")
 l_jetsAK8minmass = ("jetsAK8", "jetAK8minmass" )
-
+h_jetsAK8Area = Handle("std::vector<float>")
+l_jetsAK8Area = ( "jetsAK8" , "jetAK8jetArea" )
 #HISTOGRAMS
 
 f = ROOT.TFile(options.outname, "RECREATE")
@@ -412,8 +407,7 @@ for ifile in files :
             if options.verbose :
                 print 'rho = {0:6.2f}'.format( rho )
 
-        #EVENT HANDLE FILLING
-
+        #EVENT MUON HANDLE FILLING
         event.getByLabel ( l_muPt, h_muPt )
         event.getByLabel ( l_muEta, h_muEta )
         event.getByLabel ( l_muPhi, h_muPhi )
@@ -452,7 +446,7 @@ for ifile in files :
                         print "muon %2d: key %4d, pt %4.1f, eta %+5.3f phi %+5.3f dz(PV) %+5.3f, POG loose id %d, tight id %d." % ( i, muKey[i], muonPt[i], muonEta[i],
                                                                                                                 muonPhi[i], muonDz[i], muonLoose[i], muonTight[i])
 
-        #Electron Selection
+        #EVENT ELECTRON HANDLE FILLING
         event.getByLabel ( l_elPt, h_elPt )
         event.getByLabel ( l_elEta, h_elEta )
         event.getByLabel ( l_elPhi, h_elPhi )
@@ -473,6 +467,8 @@ for ifile in files :
         event.getByLabel ( l_elscEta , h_elscEta )
         event.getByLabel ( l_elKey, h_elKey )
         
+        #Electron Selection      
+
         goodelectronsPt = []
         goodelectronsEta = []
         goodelectronsPhi = []
@@ -578,13 +574,19 @@ for ifile in files :
                         goodelectronKey.append( elKey[i] )
                         if options.verbose :
                             print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[i], electronPt, electronSCeta, electronPhi, electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
-            
-                
+
+# define the type of decay channel based on number of leptons in event
+# $$$
+        Hadronic = (len(goodmuonPt) + len(goodelectronsPt)) == 0
+        Leptonic = (len(goodmuonPt) + len(goodelectronsPt)) == 2 #and \
+        # product of 2 charges < 0 \                             # find names of charge variables for dilepton channel
+        SemiLeptonic = (len(goodmuonPt) + len(goodelectronsPt)) == 1         
                     
-                    
-        if len(goodmuonPt) + len(goodelectronsPt) != 1 :
+        if (len(goodmuonPt) + len(goodelectronsPt)) != 1  :# $$$ changes in leptonic channel
            continue
         elif len(goodmuonPt) > 0 :
+            ##LeptonUno = ROOT.TLorentzVector()
+            ##LeptonDos = ROOT.TLorentzVector()
             theLepton = ROOT.TLorentzVector()
             theLepton.SetPtEtaPhiM( goodmuonPt[0],
                                     goodmuonEta[0],
@@ -600,6 +602,7 @@ for ifile in files :
                                     goodelectronsMass[0] )
             theLeptonObjKey = int(goodelectronKey[0])
 
+        # EVENT AK4 JET HANDLES
         event.getByLabel ( l_jetsAK4Pt, h_jetsAK4Pt )
         event.getByLabel ( l_jetsAK4Eta, h_jetsAK4Eta )
         event.getByLabel ( l_jetsAK4Phi, h_jetsAK4Phi )
@@ -621,9 +624,9 @@ for ifile in files :
         event.getByLabel ( l_jetsAK4cMultip, h_jetsAK4cMultip )
         event.getByLabel ( l_jetsAK4Y, h_jetsAK4Y )
 
-
+        # AK4 jet selection
         
-        # These will hold all of the jets we need for the selection
+        # This array stores all of our favorite jets , those that meet the selection criteria
         ak4JetsGood = []
         # For selecting leptons, look at 2-d cut of dRMin, ptRel of
         # lepton and nearest jet that has pt > 30 GeV
@@ -659,7 +662,7 @@ for ifile in files :
             
 
         for i in range(0,len(AK4Pt)):
-            #get the jets transverse energy, Eta, Phi and Mass ( essentially mom-energy 4 vector)
+            #get the jets transverse momentum, Eta, Phi and Mass ( gives same information as the 4 vector)
             #v = TLorentzVector()
             jetP4Raw = ROOT.TLorentzVector()
             jetP4Raw.SetPtEtaPhiM( AK4Pt[i], AK4Eta[i], AK4Phi[i], AK4Mass[i])
@@ -702,10 +705,10 @@ for ifile in files :
                 print '   raw jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
                     jetP4Raw.Perp(), jetP4Raw.Rapidity(), jetP4Raw.Phi(), jetP4Raw.M()
                     )
-
             cleaned = False
-            if theLepton.DeltaR(jetP4Raw) < 0.4:
-                # Check all daughters of jets close to the lepton
+                continue 
+            elif theLepton.DeltaR(jetP4Raw) < 0.4: ## will need to be edited to accomodate dilepton channel
+# Check all daughters of jets close to the lepton
                 pfcands = int(AK4NumDaughters[i])
                 for j in range(0,pfcands) :                   
                     # If any of the jet daughters matches the good lepton, remove the lepton p4 from the jet p4
@@ -725,7 +728,7 @@ for ifile in files :
             ak4JetCorrector.setJetPt ( jetP4Raw.Perp() )
             ak4JetCorrector.setJetE  ( jetP4Raw.E() )
             ak4JetCorrector.setJetA  ( AK4Area[i] )
-            ak4JetCorrector.setRho   ( rho )
+            ak4JetCorrector.setRho   ( rho )e
             ak4JetCorrector.setNPV   ( NPV )
             newJEC = ak4JetCorrector.getCorrection()
             jetP4 = jetP4Raw*newJEC
@@ -790,14 +793,13 @@ for ifile in files :
         if pass2D == False :
             continue
 
-        ############################################
-        # Get the AK8 jet away from the lepton
-        ############################################
+# AK8 selection
+  #channels:
+        # Hadronic - get 2 AK8 jets with no leptons
+        # Dilepton - no AK8 jets
+        # SemiLeptonic - Get the AK8 jet away from the lepton
 
-
-
-
-
+        #EVENT AK8 HANDLES
         event.getByLabel ( l_jetsAK8Eta, h_jetsAK8Eta )
         event.getByLabel ( l_jetsAK8Pt, h_jetsAK8Pt )
         event.getByLabel ( l_jetsAK8Phi, h_jetsAK8Phi )
@@ -816,7 +818,7 @@ for ifile in files :
         event.getByLabel ( l_jetsAK8nSubJets, h_jetsAK8nSubJets )
         event.getByLabel ( l_jetsAK8minmass, h_jetsAK8minmass )
 
-        
+        # AK8 jet selection
         ak8JetsGood = []
         ak8JetsGoodTrimMass = []
         ak8JetsGoodPrunMass = []
@@ -876,20 +878,43 @@ for ifile in files :
 
             if AK8P4Raw.Perp() < options.minAK8Pt or abs(AK8P4Raw.Rapidity()) > options.maxAK8Rapidity :
                 continue
-            # Only keep AK8 jets "away" from the lepton, so we do not need
-            # lepton-jet cleaning here. There's no double counting. 
-            dR = jetP4.DeltaR(theLepton ) 
-            if dR > ROOT.TMath.Pi()/2.0 :
-                ak8JetsGood.append(AK8P4Corr)
-                ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
-                ak8JetsGoodPrunMass.append( AK8PrunedM[i])
-                ak8JetsGoodFiltMass.append( AK8FilteredM[i])
-                ak8JetsGoodTau1.append( AK8Tau1[i])
-                ak8JetsGoodTau2.append( AK8Tau2[i])
-                ak8JetsGoodTau3.append( AK8Tau3[i])
-                ak8JetsGoodNSubJets.append( AK8nSubJets[i])
-                ak8JetsGoodMinMass.append( AK8minmass[i] )
 
+            # SemiLeptonic- Only keep AK8 jets "away" from the lepton, so we do not need lepton-jet cleaning here. There's no double counting. 
+            # Leptonic - No fat jets                                                                          
+            # Hadronic - 2 AK8's, no massy leptons to clean up after
+
+            
+            if SemiLeptonic == True:
+            	dR = jetP4.DeltaR(theLepton ) 
+            	if dR > ROOT.TMath.Pi()/2.0 :
+                	ak8JetsGood.append(AK8P4Corr)
+                	ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
+                	ak8JetsGoodPrunMass.append( AK8PrunedM[i])
+                	ak8JetsGoodFiltMass.append( AK8FilteredM[i])
+                	ak8JetsGoodTau1.append( AK8Tau1[i])
+                	ak8JetsGoodTau2.append( AK8Tau2[i])
+                	ak8JetsGoodTau3.append( AK8Tau3[i])
+                	ak8JetsGoodNSubJets.append( AK8nSubJets[i])
+                	ak8JetsGoodMinMass.append( AK8minmass[i] )
+
+            if Leptonic == True:
+                continue
+            if Hadronic == True:                                 # $$$
+ 		    ## HADRONIC CHANNEL CRITERIA 
+     
+            # - minimum mass pairing > 50 GeV
+            # - number of Subjets >= 3
+            # - Jet Mass > 100 GeV
+				if AK8nSubJets[i] >= 3 and AK8minmass[i] > 50 and AK8P4Corr.M() > 100 :
+                	ak8JetsGood.append(AK8P4Corr)
+                	ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
+                	ak8JetsGoodPrunMass.append( AK8PrunedM[i])
+                	ak8JetsGoodFiltMass.append( AK8FilteredM[i])
+                	ak8JetsGoodTau1.append( AK8Tau1[i])
+                	ak8JetsGoodTau2.append( AK8Tau2[i])
+                	ak8JetsGoodTau3.append( AK8Tau3[i])
+                	ak8JetsGoodNSubJets.append( AK8nSubJets[i])
+                	ak8JetsGoodMinMass.append( AK8minmass[i] )
         #Tagging
         if len(ak8JetsGood) < 1 :
             if options.verbose :
@@ -955,12 +980,12 @@ for ifile in files :
         if nttags == 0 :
             if options.verbose : 
                 print 'No top tags'
-        else :
+        elif nttags == 1 :               # $$$
             
             hadTopCandP4 = tJets[0]
             
             lepTopCandP4 = None
-            ##!!! EDITTED UP TO HERE
+     
             # Check if the nearest jet to the lepton is b-tagged
             if theLepJetBDisc < options.bDiscMin :
                 if options.verbose : 
@@ -986,9 +1011,18 @@ for ifile in files :
                         print '--- No solution for neutrino z ---'
                     nuCandP4.SetPz(nuz1.real)
 
-                lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
+                lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4 
+        elif nttags == 2 : # $$$
+            hadTopCand1P4 = tJets[0]
+            hadTopCand2P4 = tJets[1]
 
-                ttbarCand = hadTopCandP4 + lepTopCandP4
+
+                if Hadronic == True :   # $$$
+			        ttbarCand = hadTopCand1P4 + hadTopCand2P4
+		        if Leptonic == True :
+		            ttbarCand = lepTopCand1P4 + lepTopCand2P4
+		        if SemiLeptonic == True :
+                    ttbarCand = hadTopCandP4 + lepTopCandP4
                 h_mttbar.Fill( ttbarCand.M() )
                 #if haveGenSolution == False :
                 #    print 'Very strange. No gen solution, but it is a perfectly good event. mttbar = ' + str(ttbarCandMass )
