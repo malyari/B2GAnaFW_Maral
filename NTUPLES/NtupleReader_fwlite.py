@@ -19,6 +19,11 @@ parser.add_option('--verbose', action='store_true',
                   dest='verbose',
                   help='Print debugging info')
 
+parser.add_option('--selection', type='int', action='store',
+                  default=-1,
+                  dest='selection',
+                  help='Leptonic (0), SemiLeptonic (1) or AllHadronic (2)')
+
 parser.add_option('--maxevents', type='int', action='store',
                   default=-1,
                   dest='maxevents',
@@ -473,8 +478,8 @@ for ifile in files :
                     goodmuonMass.append(muonMass[imuon])
                     goodmuonKey.append(muKey[imuon])
                     if options.verbose :
-                        print "muon %2d: key %4d, pt %4.1f, eta %+5.3f phi %+5.3f dz(PV) %+5.3f, POG loose id %d, tight id %d." % ( imuon, muKey[imuon], muonPt[imuon], muonEta[imuon],
-                                                                                                                muonPhi[i], muonDz[i], muonLoose[i], muonTight[i])
+                        print "muon %2d: key %4d, pt %4.1f, eta %+5.3f phi %+5.3f dz(PV) %+5.3f, POG loose id %d, tight id %d." %  \
+                        ( imuon, muKey[imuon], muonPt[imuon], muonEta[imuon],muonPhi[imuon], muonDz[imuon], muonLoose[imuon], muonTight[imuon])
 
 
         event.getByLabel ( l_elPt, h_elPt )
@@ -619,11 +624,18 @@ for ifile in files :
 
         SemiLeptonic = (len(goodmuonPt) + len(goodelectronsPt)) == 1         
 
+        if options.selection == 0 and not Leptonic :
+            continue
+        elif options.selection == 1 and not SemiLeptonic :
+            continue
+        elif options.selection == 2 and not Hadronic :
+            continue
+        
 
         ##################
         # Dileptonic
         ##################
-        if Dileptonic == True : 
+        if Leptonic == True : 
             #Dilepton Selection        
             if len(goodmuonPt) == 2 and muCharge[0]*muCharge[1]<0:
                 dimuonCandidate = True
@@ -641,12 +653,6 @@ for ifile in files :
             else :
                     mixedCandidate = False
 
-                '''if (electronCharge[0]*electronCharge[1] or muonCharge[0]*muonCharge[1] or electronCharge[0]*muonCharge[1] or electronCharge[1]*muonCharge[0])
-
-
-                    dielectron = True
-                else :
-                    dielectron = False'''
 
             if dimuonCandidate :
                 #if len(goodmuonPt) == 2 :
@@ -725,7 +731,7 @@ for ifile in files :
                                         goodelectronsMass[0] )
                 theLeptonObjKey = int(goodelectronKey[0])
             
-            print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[ielectron], electronPt, electronSCeta, electronPhi, electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
+            #print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[ielectron], electronPt, electronSCeta, electronPhi, electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
                            
            
         # EVENT AK4 JET HANDLES
@@ -835,7 +841,7 @@ for ifile in files :
             cleaned = False
 
 
-            if Semileptonic : 
+            if SemiLeptonic : 
                 if theLepton.DeltaR(jetP4Raw) < 0.4: 
                     # Check all daughters of jets close to the lepton
                     pfcands = int(AK4NumDaughters[i])
@@ -906,7 +912,7 @@ for ifile in files :
 
 
 
-        if Semileptonic : 
+        if SemiLeptonic : 
             theLepJet = nearestJetP4
             theLepJetBDisc = nearestJetbDiscrim
 
@@ -1203,7 +1209,7 @@ for ifile in files :
         ######
         # Semileptonic
         ######            
-        elif Semileptonic and nttags == 1 :               # $$$
+        elif SemiLeptonic and nttags == 1 :               # $$$
             
             hadTopCandP4 = tJets[0]
             
@@ -1213,6 +1219,8 @@ for ifile in files :
             if theLepJetBDisc < options.bDiscMin :
                 if options.verbose : 
                     print 'closest jet to lepton is not b-tagged'
+
+                continue
             else  :
 
                 if options.verbose :
@@ -1238,7 +1246,7 @@ for ifile in files :
         ######
         # Hadronic
         ######                
-        elif Hadronic and nttags == 2 : # $$$
+        elif Hadronic and nttags >= 2 : # $$$
             hadTopCand1P4 = tJets[0]
             hadTopCand2P4 = tJets[1]
 
@@ -1246,15 +1254,17 @@ for ifile in files :
 
 
 
-
+        ttbarCand = None
                         
-        if Hadronic == True :   # $$$
+        if Hadronic == True and nttags >= 2 :   # $$$
             ttbarCand = hadTopCand1P4 + hadTopCand2P4
-        if Leptonic == True :
+        if Leptonic == True  :
             ttbarCand = lepTopCand1P4 + lepTopCand2P4
-        if SemiLeptonic == True :
+        if SemiLeptonic == True and nttags >= 1 :
             ttbarCand = hadTopCandP4 + lepTopCandP4
-        h_mttbar.Fill( ttbarCand.M() )
+
+        if ttbarCand != None : 
+            h_mttbar.Fill( ttbarCand.M() )
         #if haveGenSolution == False :
         #    print 'Very strange. No gen solution, but it is a perfectly good event. mttbar = ' + str(ttbarCandMass )
         
