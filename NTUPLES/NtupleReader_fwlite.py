@@ -1209,10 +1209,8 @@ for ifile in files :
         ######
         # Semileptonic
         ######            
-        elif SemiLeptonic and nttags == 1 :               # $$$
-            
+        elif SemiLeptonic == True and nttags >= 1 :               # $$$
             hadTopCandP4 = tJets[0]
-            
             lepTopCandP4 = None
 
             # Check if the nearest jet to the lepton is b-tagged
@@ -1232,6 +1230,7 @@ for ifile in files :
                 nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
 
                 solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
+                # If there is at least one real solution, pick it up
                 # If there is at least one real solution, pick it up
                 if solution :
                     if options.verbose : 
