@@ -647,13 +647,13 @@ for ifile in files :
             else :
                 dielectronCandidate = False
 
-            if len(goodmuonPt) == 1 and len(goodelectronsPt) == 1:
-                    if  electronCharge[0]*muCharge[0]<0 or electronCharge[0]*muCharge[0]<0 :
-                        mixedCandidate = True
+            if len(goodmuonPt) == 1 and len(goodelectronsPt)==1 and  electronCharge[0]*muCharge[0]<0 :
+                mixedCandidate = True
             else :
-                    mixedCandidate = False
-
-
+                mixedCandidate = False
+            if dimuonCandidate==False and dielectronCandidate == False and mixedCandidate == False : 
+                Leptonic = False
+            
             if dimuonCandidate :
                 #if len(goodmuonPt) == 2 :
                 Lepton1 = ROOT.TLorentzVector()
@@ -683,18 +683,18 @@ for ifile in files :
                                       goodelectronMass[1] )
                 Lepton2ObjKey = int(goodelectronKey[1])
             elif mixedCandidate :
-                muonb = ROOT.TLorentzVector()
-                electronb = ROOT.TLorentzVector()
-                muonb.SetPtEtaPhiM( goodmuonPt[0],
+                Lepton1 = ROOT.TLorentzVector()
+                Lepton2 = ROOT.TLorentzVector()
+                Lepton1.SetPtEtaPhiM( goodmuonPt[0],
                                     goodmuonEta[0],
                                     goodmuonPhi[0],
                                     goodmuonMass[0] )
-                muonbObjKey = int(goodmuonKey[0])
-                electronb.SetPtEtaPhiM( goodelectronPt[0],
+                Lepton1ObjKey = int(goodmuonKey[0])
+                Lepton2.SetPtEtaPhiM( goodelectronPt[0],
                                         goodelectronEta[0],
                                         goodelectronPhi[0],
                                         goodelectronMass[0] )
-                electronbObjKey = int(goodelectronKey[0])
+                Lepton2ObjKey = int(goodelectronKey[0])
 
             if dimuonCandidate or dielectronCandidate or mixedCandidate :
                 event.getByLabel ( l_metPt, h_metPt )
@@ -860,7 +860,8 @@ for ifile in files :
                 ##### Adapt above clause for dilepton case..
                 # Remove BOTH from the jet constituent list.
                 xxxbad = 0
-                print 'Still need to implement jet-lepton cleaning for dilepton case'
+                if options.verbose :
+                    print 'Still need to implement jet-lepton cleaning for dilepton case'
 
 
             ak4JetCorrector.setJetEta( jetP4Raw.Eta() )
@@ -876,29 +877,46 @@ for ifile in files :
                 if options.verbose : 
                     print '   jet failed kinematic cuts'
                 continue
-            dR = jetP4.DeltaR(theLepton ) 
+            if SemiLeptonic :
+                dR = jetP4.DeltaR(theLepton )
+            if Leptonic :
+                dR1 = jetP4.DeltaR(Lepton1 )
+                dR2 = jetP4.DeltaR(Lepton2 )
             ak4JetsGood.append(jetP4)
             if options.verbose :
                 print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
                     jetP4.Perp(), jetP4.Rapidity(), jetP4.Phi(), jetP4.M(), AK4CSV[i] )
-            if dR < dRMin :
-                inearestJet = i
-                nearestJetP4 = jetP4
-                dRMin = dR
-                nearestJetbDiscrim = AK4CSV[i]
-
+            if SemiLeptonic :
+                if dR < dRMin :
+                    inearestJet = i
+                    nearestJetP4 = jetP4
+                    dRMin = dR
+                    nearestJetbDiscrim = AK4CSV[i]
+            elif Leptonic :
+                if dR1 < dRMin :
+                    inearestJet = i
+                    nearestJetP4 = jetP4
+                    dRMin = dR1
+                    nearestJetbDiscrim = AK4CSV[i]
+                if dR2 < dRMin :
+                    inearestJet = i
+                    nearestJetP4 = jetP4
+                    dRMin = dR2
+                    nearestJetbDiscrim = AK4CSV[i]
+                
 
 
         # Here, we have the AK4 jets and the leptons, and skip if we do not find a jet near the lepton(s)
-        if inearestJet < 0 :
-            if options.verbose :
-                print '   no nearest jet found, skipping'
-            continue
-        else :
-            if options.verbose :
-                print '>>>>>>>> nearest jet to lepton is ' + str( inearestJet )
-                print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
-                    nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )                 
+        if SemiLeptonic or Leptonic :
+            if inearestJet < 0 :
+                if options.verbose :
+                    print '   no nearest jet found, skipping'
+                continue
+            else :
+                if options.verbose :
+                    print '>>>>>>>> nearest jet to lepton is ' + str( inearestJet )
+                    print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
+                        nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )                 
 
         #Get MET HERE
         event.getByLabel ( l_metPt, h_metPt )
@@ -943,7 +961,8 @@ for ifile in files :
 
         elif Leptonic :
             xxxxybad = 0
-            print 'Still need 2d selection on BOTH leptons for dilepton channel'
+            if options.verbose :
+                print 'Still need 2d selection on BOTH leptons for dilepton channel'
 
 
                         
@@ -1068,20 +1087,24 @@ for ifile in files :
                         AK8P4Raw.Perp(), AK8P4Raw.Rapidity(), AK8P4Raw.Phi(), AK8P4Raw.M()
                         )
 
+                
                 cleaned = False
-                if theLepton.DeltaR(AK8P4Raw) < 0.8:
-                    # Check all daughters of jets close to the lepton
-                    pfcands = int(AK8numDaughters[i])
-                    for j in range(0,pfcands) :                   
-                        # If any of the jet daughters matches the good lepton, remove the lepton p4 from the jet p4
-                        if AK8Keys[i][j] == theLeptonObjKey : 
-                            if options.verbose :
-                                print '     -----> removing lepton, pt/eta/phi = {0:6.2f},{1:6.2f},{2:6.2f}'.format(
-                                    theLepton.Perp(), theLepton.Eta(), theLepton.Phi()
-                                    )
-                            AK8P4Raw -= theLepton
-                            cleaned = True
-                            break
+                if SemiLeptonic :
+                    if theLepton.DeltaR(AK8P4Raw) < 0.8 :
+                        # Check all daughters of jets close to the lepton
+                        pfcands = int(AK8numDaughters[i])
+                        for j in range(0,pfcands) :                   
+                            # If any of the jet daughters matches the good lepton, remove the lepton p4 from the jet p4
+                            if AK8Keys[i][j] == theLeptonObjKey : 
+                                if options.verbose :
+                                    print '     -----> removing lepton, pt/eta/phi = {0:6.2f},{1:6.2f},{2:6.2f}'.format(
+                                        theLepton.Perp(), theLepton.Eta(), theLepton.Phi()
+                                        )
+                                AK8P4Raw -= theLepton
+                                cleaned = True
+                                break
+                elif Hadronic :
+                    cleaned = True
 
                 RawAK8Energy = AK8P4Raw.Energy()
 
@@ -1205,7 +1228,8 @@ for ifile in files :
         ######
         if Leptonic and nttags == 0 :
             xxxyyyzzzbad = 0
-            print 'Leptonic mass selection needs to be implemented!'
+            if options.verbose :
+                print 'Leptonic mass selection needs to be implemented!'
         ######
         # Semileptonic
         ######            
@@ -1257,8 +1281,8 @@ for ifile in files :
                         
         if Hadronic == True and nttags >= 2 :   # $$$
             ttbarCand = hadTopCand1P4 + hadTopCand2P4
-        if Leptonic == True  :
-            ttbarCand = lepTopCand1P4 + lepTopCand2P4
+        if Leptonic == True  : #Need to implement still
+            continue #ttbarCand = lepTopCand1P4 + lepTopCand2P4
         if SemiLeptonic == True and nttags >= 1 :
             ttbarCand = hadTopCandP4 + lepTopCandP4
 
