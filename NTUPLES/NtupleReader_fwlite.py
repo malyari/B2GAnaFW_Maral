@@ -1300,7 +1300,7 @@ for ifile in files :
         ######
         # Leptonic
         ######
-        if Leptonic and nttags == 0 :
+        if Leptonic :
 
             ttbarCandP4 = None
 
@@ -1375,7 +1375,7 @@ for ifile in files :
                         
         if Hadronic == True and nttags >= 2 :   # $$$
             ttbarCand = hadTopCand1P4 + hadTopCand2P4
-        if Leptonic == True  : #Need to implement still
+        if Leptonic == True  : 
             ttbarCand = ttbarCandP4
         if SemiLeptonic == True and nttags >= 1 :
             ttbarCand = hadTopCandP4 + lepTopCandP4
