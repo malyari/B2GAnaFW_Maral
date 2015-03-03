@@ -655,20 +655,18 @@ for ifile in files :
                 Leptonic = False
             
             if dimuonCandidate :
-                #if len(goodmuonPt) == 2 :
                 Lepton1 = ROOT.TLorentzVector()
                 Lepton2 = ROOT.TLorentzVector()
                 Lepton1.SetPtEtaPhiM( goodmuonPt[0],
                                       goodmuonEta[0],
                                       goodmuonPhi[0],
                                       goodmuonMass[0] )
-                Lepton1ObjKey = int(goodmuonKey[0])#!!! Can skip this
+                Lepton1ObjKey = int(goodmuonKey[0])
                 Lepton2.SetPtEtaPhiM( goodmuonPt[1],
                                       goodmuonEta[1],
                                       goodmuonPhi[1],
                                       goodmuonMass[1] )
                 Lepton2ObjKey = int(goodmuonKey[1])
-                #elif len(goodelectronsPt) == 2 :
             elif dielectronCandidate :
                 Lepton1 = ROOT.TLorentzVector()
                 Lepton2 = ROOT.TLorentzVector()
@@ -696,16 +694,10 @@ for ifile in files :
                                         goodelectronMass[0] )
                 Lepton2ObjKey = int(goodelectronKey[0])
 
-            if dimuonCandidate or dielectronCandidate or mixedCandidate :
-                event.getByLabel ( l_metPt, h_metPt )
-                #event.getByLabel ( l_metPx, h_metPx )
-                #event.getByLabel ( l_metPy, h_metPy )
-                #event.getByLabel ( l_metPhi, h_metPhi )
-                metPt = h_metPt.product()[0]
-                #metPx = h_metPx.product()[0]
-                #metPy = h_metPy.product()[0]
-                #metPhi = h_metPhi.product()[0]
-                h_met.Fill(metPt)
+            #if dimuonCandidate or dielectronCandidate or mixedCandidate :#!!! Might Skip this until AK4 loop
+            #    event.getByLabel ( l_metPt, h_metPt )
+            #    metPt = h_metPt.product()[0]
+            #    h_met.Fill(metPt)
 
 
         ##################
@@ -730,10 +722,7 @@ for ifile in files :
                                         goodelectronsPhi[0],
                                         goodelectronsMass[0] )
                 theLeptonObjKey = int(goodelectronKey[0])
-            
-            #print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[ielectron], electronPt, electronSCeta, electronPhi, electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
-                           
-           
+                                   
         # EVENT AK4 JET HANDLES
         event.getByLabel ( l_jetsAK4Pt, h_jetsAK4Pt )
         event.getByLabel ( l_jetsAK4Eta, h_jetsAK4Eta )
@@ -764,10 +753,13 @@ for ifile in files :
         # For selecting leptons, look at 2-d cut of dRMin, ptRel of
         # lepton and nearest jet that has pt > 30 GeV
         dRMin = 9999.0
+        dR2Min = 9999.0
         inearestJet = -1    # Index of nearest jet
+        i2nearestJet = -1
+        nearest2JetMass = None
         nearestJetMass = None   # Nearest jet
 
-        if len(h_jetsAK4Pt.product()) > 0:
+        if len(h_jetsAK4Pt.product()) > 0 :
             AK4Pt = h_jetsAK4Pt.product()
             AK4Eta = h_jetsAK4Eta.product()
             AK4Phi = h_jetsAK4Phi.product()
@@ -793,8 +785,12 @@ for ifile in files :
             AK4cMultip =  h_jetsAK4cMultip.product()
             AK4Y =  h_jetsAK4Y.product()    
             
+        if Hadronic :
+            length = 0
+        else :
+            length = len(AK4Pt)
 
-        for i in range(0,len(AK4Pt)):
+        for i in range(0,length):
             #get the jets transverse momentum, Eta, Phi and Mass ( gives same information as the 4 vector)
             #v = TLorentzVector()
             jetP4Raw = ROOT.TLorentzVector()
@@ -857,13 +853,33 @@ for ifile in files :
                             break
 
             elif Leptonic :
-                ##### Adapt above clause for dilepton case..
-                # Remove BOTH from the jet constituent list.
-                xxxbad = 0
-                if options.verbose :
-                    print 'Still need to implement jet-lepton cleaning for dilepton case'
-
-
+                if Lepton1.DeltaR(jetP4Raw) < 0.4: 
+                    # Check all daughters of jets close to the lepton
+                    pfcands = int(AK4NumDaughters[i])
+                    for j in range(0,pfcands) :                   
+                        # If any of the jet daughters matches the good lepton, remove the lepton p4 from the jet p4
+                        if AK4Keys[i][j] == Lepton1ObjKey : 
+                            if options.verbose :
+                                print '     -----> removing lepton, pt/eta/phi = {0:6.2f},{1:6.2f},{2:6.2f}'.format(
+                                    Lepton1.Perp(), Lepton1.Eta(), Lepton1.Phi()
+                                    )
+                            jetP4Raw -= Lepton1
+                            cleaned = True
+                            break
+                if Lepton2.DeltaR(jetP4Raw) < 0.4: 
+                    # Check all daughters of jets close to the lepton
+                    pfcands = int(AK4NumDaughters[i])
+                    for j in range(0,pfcands) :                   
+                        # If any of the jet daughters matches the good lepton, remove the lepton p4 from the jet p4
+                        if AK4Keys[i][j] == Lepton2ObjKey : 
+                            if options.verbose :
+                                print '     -----> removing lepton, pt/eta/phi = {0:6.2f},{1:6.2f},{2:6.2f}'.format(
+                                    Lepton2.Perp(), Lepton2.Eta(), Lepton2.Phi()
+                                    )
+                            jetP4Raw -= Lepton2
+                            cleaned = True
+                            break
+                
             ak4JetCorrector.setJetEta( jetP4Raw.Eta() )
             ak4JetCorrector.setJetPt ( jetP4Raw.Perp() )
             ak4JetCorrector.setJetE  ( jetP4Raw.E() )
@@ -898,16 +914,16 @@ for ifile in files :
                     nearestJetP4 = jetP4
                     dRMin = dR1
                     nearestJetbDiscrim = AK4CSV[i]
-                if dR2 < dRMin :
-                    inearestJet = i
-                    nearestJetP4 = jetP4
-                    dRMin = dR2
-                    nearestJetbDiscrim = AK4CSV[i]
+                if dR2 < dR2Min :
+                    i2nearestJet = i
+                    nearest2JetP4 = jetP4
+                    dR2Min = dR2
+                    nearest2JetbDiscrim = AK4CSV[i]
                 
-
+            #@End AK4Jet Loop
 
         # Here, we have the AK4 jets and the leptons, and skip if we do not find a jet near the lepton(s)
-        if SemiLeptonic or Leptonic :
+        if SemiLeptonic :
             if inearestJet < 0 :
                 if options.verbose :
                     print '   no nearest jet found, skipping'
@@ -916,20 +932,33 @@ for ifile in files :
                 if options.verbose :
                     print '>>>>>>>> nearest jet to lepton is ' + str( inearestJet )
                     print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
-                        nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )                 
+                        nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )   
+
+        if Leptonic :
+            if inearestJet < 0 or i2nearestJet < 0:
+                if options.verbose :
+                    print '   no nearest jet found for both leptons, skipping'
+                continue
+            else :
+                if options.verbose :
+                    print '>>>>>>>> nearest jet to lepton 1 is ' + str( inearestJet )
+                    print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
+                        nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )
+                    print '>>>>>>>> nearest jet to lepton 2 is ' + str( inearestJet )
+                    print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
+                        nearest2JetP4.Perp(), nearest2JetP4.Rapidity(), nearest2JetP4.Phi(), nearest2JetP4.M(), nearest2JetbDiscrim )
 
         #Get MET HERE
         event.getByLabel ( l_metPt, h_metPt )
         event.getByLabel ( l_metPx, h_metPx )
         event.getByLabel ( l_metPy, h_metPy )
         event.getByLabel ( l_metPhi, h_metPhi )
-        metPt = h_metPt.product()[0]
+
         metPx = h_metPx.product()[0]
         metPy = h_metPy.product()[0]
         metPhi = h_metPhi.product()[0]
-
-
-
+        metPt = h_metPt.product()[0]
+        
         if SemiLeptonic : 
             theLepJet = nearestJetP4
             theLepJetBDisc = nearestJetbDiscrim
@@ -960,12 +989,57 @@ for ifile in files :
 
 
         elif Leptonic :
-            xxxxybad = 0
+            theLepJet = nearestJetP4
+            theLepJetBDisc = nearestJetbDiscrim
+
+            h_ptAK4.Fill( theLepJet.Perp() )
+            h_etaAK4.Fill( theLepJet.Eta() )
+            h_yAK4.Fill( theLepJet.Rapidity() )
+            h_mAK4.Fill( theLepJet.M() )
+            h_bdiscAK4.Fill( theLepJetBDisc )
+
+            ptRel = theLepJet.Perp( Lepton1.Vect() )
+            h_ptLep.Fill(Lepton1.Perp())
+            h_etaLep.Fill(Lepton1.Eta())
+            h_met.Fill(metPt)
+            h_ptRel.Fill( ptRel )
+            h_dRMin.Fill( dRMin )
+            h_2DCut.Fill( dRMin, ptRel )
+
+            pass2D = ptRel > 20.0 or dRMin > 0.4
             if options.verbose :
-                print 'Still need 2d selection on BOTH leptons for dilepton channel'
+                print '>>>>>>>>>>>>>>'
+                print '2d cut 1 : dRMin = {0:6.2f}, ptRel = {1:6.2f}'.format( dRMin, ptRel )
+                print '>>>>>>>>>>>>>>'
+            if pass2D == False :
+                continue
+
+            theLepJet2 = nearest2JetP4
+            theLepJetBDisc2 = nearest2JetbDiscrim
+
+            h_ptAK4.Fill( theLepJet2.Perp() )
+            h_etaAK4.Fill( theLepJet2.Eta() )
+            h_yAK4.Fill( theLepJet2.Rapidity() )
+            h_mAK4.Fill( theLepJet2.M() )
+            h_bdiscAK4.Fill( theLepJetBDisc2 )
+
+            ptRel2 = theLepJet2.Perp( Lepton2.Vect() )
+            h_ptLep.Fill(Lepton2.Perp())
+            h_etaLep.Fill(Lepton2.Eta())
+            h_met.Fill(metPt)
+            h_ptRel.Fill( ptRel )
+            h_dRMin.Fill( dR2Min )
+            h_2DCut.Fill( dR2Min, ptRel )
+                                    
 
 
-                        
+            pass2D = ptRel2 > 20.0 or dR2Min > 0.4
+            if options.verbose :
+                print '>>>>>>>>>>>>>>'
+                print '2d cut 2 : dRMin = {0:6.2f}, ptRel = {1:6.2f}'.format( dRMin, ptRel )
+                print '>>>>>>>>>>>>>>'
+            if pass2D == False :
+                continue
         # AK8 selection
         #channels:
         # Hadronic - get 2 AK8 jets with no leptons
@@ -1227,9 +1301,29 @@ for ifile in files :
         # Leptonic
         ######
         if Leptonic and nttags == 0 :
-            xxxyyyzzzbad = 0
-            if options.verbose :
-                print 'Leptonic mass selection needs to be implemented!'
+
+            ttbarCandP4 = None
+
+            # Check if the nearest jet to the lepton is b-tagged
+            if theLepJetBDisc < options.bDiscMin and theLepJetBDisc2 < options.bDiscMin :
+                if options.verbose : 
+                    print 'closest jet to lepton is not b-tagged'
+                    
+                continue
+            else  :
+
+                if options.verbose :
+                    print 'Event is fully tagged.'
+                # Get the z-component of the lepton from the W mass constraint
+                
+                bJetCandP4 = theLepJet
+                bJetCand2P4 = theLepJet2
+                
+                nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
+                
+                ttbarCandP4 = nuCandP4 + Lepton1 + Lepton2 + bJetCandP4 + bJetCand2P4
+
+            
         ######
         # Semileptonic
         ######            
@@ -1241,7 +1335,7 @@ for ifile in files :
             if theLepJetBDisc < options.bDiscMin :
                 if options.verbose : 
                     print 'closest jet to lepton is not b-tagged'
-
+                    
                 continue
             else  :
 
@@ -1282,16 +1376,13 @@ for ifile in files :
         if Hadronic == True and nttags >= 2 :   # $$$
             ttbarCand = hadTopCand1P4 + hadTopCand2P4
         if Leptonic == True  : #Need to implement still
-            continue #ttbarCand = lepTopCand1P4 + lepTopCand2P4
+            ttbarCand = ttbarCandP4
         if SemiLeptonic == True and nttags >= 1 :
             ttbarCand = hadTopCandP4 + lepTopCandP4
 
         if ttbarCand != None : 
             h_mttbar.Fill( ttbarCand.M() )
-        #if haveGenSolution == False :
-        #    print 'Very strange. No gen solution, but it is a perfectly good event. mttbar = ' + str(ttbarCandMass )
         
-
 #CLEANUP
 
 f.cd()
