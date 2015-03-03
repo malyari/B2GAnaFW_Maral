@@ -505,10 +505,10 @@ for ifile in files :
         
         #Electron Selection      
 
-        goodelectronsPt = []
-        goodelectronsEta = []
-        goodelectronsPhi = []
-        goodelectronsMass = []
+        goodelectronPt = []
+        goodelectronEta = []
+        goodelectronPhi = []
+        goodelectronMass = []
         goodelectronKey = []
 
 
@@ -608,10 +608,10 @@ for ifile in files :
                     
                     if goodElectron == True :
                         
-                        goodelectronsPt.append( iePt )
-                        goodelectronsEta.append( ieEta )
-                        goodelectronsPhi.append( iePhi )
-                        goodelectronsMass.append( ieMass )
+                        goodelectronPt.append( iePt )
+                        goodelectronEta.append( ieEta )
+                        goodelectronPhi.append( iePhi )
+                        goodelectronMass.append( ieMass )
                         goodelectronKey.append( elKey[ielectron] )
                         if options.verbose :
 
@@ -619,10 +619,10 @@ for ifile in files :
 
 # define the type of decay channel based on number of leptons in event
 # $$$
-        Hadronic = (len(goodmuonPt) + len(goodelectronsPt)) == 0
-        Leptonic = (len(goodmuonPt) + len(goodelectronsPt)) == 2 #and \
+        Hadronic = (len(goodmuonPt) + len(goodelectronPt)) == 0
+        Leptonic = (len(goodmuonPt) + len(goodelectronPt)) == 2 #and \
 
-        SemiLeptonic = (len(goodmuonPt) + len(goodelectronsPt)) == 1         
+        SemiLeptonic = (len(goodmuonPt) + len(goodelectronPt)) == 1         
 
         if options.selection == 0 and not Leptonic :
             continue
@@ -642,12 +642,12 @@ for ifile in files :
             else :
                 dimuonCandidate = False
 
-            if len(goodelectronsPt) == 2 and electronCharge[0]*electronCharge[1]<0:
+            if len(goodelectronPt) == 2 and electronCharge[0]*electronCharge[1]<0:
                 dielectronCandidate = True
             else :
                 dielectronCandidate = False
 
-            if len(goodmuonPt) == 1 and len(goodelectronsPt)==1 and  electronCharge[0]*muCharge[0]<0 :
+            if len(goodmuonPt) == 1 and len(goodelectronPt)==1 and  electronCharge[0]*muCharge[0]<0 :
                 mixedCandidate = True
             else :
                 mixedCandidate = False
@@ -717,10 +717,10 @@ for ifile in files :
 
             else :
                 theLepton = ROOT.TLorentzVector()
-                theLepton.SetPtEtaPhiM( goodelectronsPt[0],
-                                        goodelectronsEta[0],
-                                        goodelectronsPhi[0],
-                                        goodelectronsMass[0] )
+                theLepton.SetPtEtaPhiM( goodelectronPt[0],
+                                        goodelectronEta[0],
+                                        goodelectronPhi[0],
+                                        goodelectronMass[0] )
                 theLeptonObjKey = int(goodelectronKey[0])
                                    
         # EVENT AK4 JET HANDLES
