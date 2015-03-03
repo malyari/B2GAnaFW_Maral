@@ -613,9 +613,9 @@ for ifile in files :
                         goodelectronPhi.append( iePhi )
                         goodelectronMass.append( ieMass )
                         goodelectronKey.append( elKey[ielectron] )
-                        if options.verbose :
+                        #if options.verbose :
 
-                            print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[i], electronPt, electronSCeta, electronPhi, electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
+                            #print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[i], electronPt[i], electronSCeta, electronPhi[i], electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
 
 # define the type of decay channel based on number of leptons in event
 # $$$
@@ -651,8 +651,10 @@ for ifile in files :
                 mixedCandidate = True
             else :
                 mixedCandidate = False
-            if dimuonCandidate==False and dielectronCandidate == False and mixedCandidate == False : 
-                Leptonic = False
+            if dimuonCandidate == False and dielectronCandidate == False and mixedCandidate == False : 
+                if options.verbose :
+                    print " Event with 2 Leptons but not of opposite charge, skipping "
+                continue
             
             if dimuonCandidate :
                 Lepton1 = ROOT.TLorentzVector()
@@ -944,7 +946,7 @@ for ifile in files :
                     print '>>>>>>>> nearest jet to lepton 1 is ' + str( inearestJet )
                     print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
                         nearestJetP4.Perp(), nearestJetP4.Rapidity(), nearestJetP4.Phi(), nearestJetP4.M(), nearestJetbDiscrim )
-                    print '>>>>>>>> nearest jet to lepton 2 is ' + str( inearestJet )
+                    print '>>>>>>>> nearest jet to lepton 2 is ' + str( i2nearestJet )
                     print '   corrjet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, bdisc = {4:6.2f}'.format (
                         nearest2JetP4.Perp(), nearest2JetP4.Rapidity(), nearest2JetP4.Phi(), nearest2JetP4.M(), nearest2JetbDiscrim )
 
@@ -1036,7 +1038,7 @@ for ifile in files :
             pass2D = ptRel2 > 20.0 or dR2Min > 0.4
             if options.verbose :
                 print '>>>>>>>>>>>>>>'
-                print '2d cut 2 : dRMin = {0:6.2f}, ptRel = {1:6.2f}'.format( dRMin, ptRel )
+                print '2d cut 2 : dRMin = {0:6.2f}, ptRel = {1:6.2f}'.format( dR2Min, ptRel2 )
                 print '>>>>>>>>>>>>>>'
             if pass2D == False :
                 continue
