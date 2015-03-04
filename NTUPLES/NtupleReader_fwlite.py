@@ -474,7 +474,7 @@ for ifile in files : #{ Loop over root files
         goodmuonPhi = []
         goodmuonMass = []
         goodmuonKey = []
-	goodmuonCharge = []
+        goodmuonCharge = []
 
         #Use MuPt as iterater due to no definite iterator value in ntuples
         if len(h_muPt.product()) > 0:
@@ -582,36 +582,39 @@ for ifile in files : #{ Loop over root files
                                         
                     relIso = ieabsiso / iePt
                     iepass = passConversionVeto[ielectron]
-                                
-                    goodElectron = False
-                    # Barrel ECAL cuts
-                    if abs(ielscEta) < 1.479 : #$ Electron Barrel Cuts ( will skip electron if this isn't passed )
-                        goodElectron = \
-                          abs( ieEtaIn ) < 0.0091 and \
-                          abs( iePhiIn ) < 0.031 and \
-                          iefull < 0.0106 and \
-                          ieHoE < 0.0532 and \
-                          abs(ieD0) < 0.0126 and \
-                          abs(ieDz) < 0.0116 and \
-                          abs( ieooEmooP ) < 0.0609 and \
-                          iepass
+    
+                    ## goodElectron = False
+                    ## # Barrel ECAL cuts
+                    ## # "Medium" operating point from
+                    ## # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
+                    ## # (mostly)
+                    ## if abs(ielscEta) < 1.479 : #$ Electron Barrel Cuts ( will skip electron if this isn't passed )
+                    ##     goodElectron = \
+                    ##       abs( ieEtaIn ) < 0.007641 and \
+                    ##       abs( iePhiIn ) < 0.032643 and \
+                    ##       iefull < 0.010399	 and \
+                    ##       ieHoE < 0.060662 and \
+                    ##       abs(ieD0) < 0.011811 and \
+                    ##       abs(ieDz) < 0.070775 and \
+                    ##       abs( ieooEmooP ) < 0.153897 #and \
+                    ##       #iepass
                                                                         
                                                                         
-                    # Endcap ECAL cuts
-                    elif abs(ielscEta) < 2.5 and abs(ielscEta) > 1.479 : #$ Electron Endcap cuts
+                    ## # Endcap ECAL cuts
+                    ## elif abs(ielscEta) < 2.5 and abs(ielscEta) > 1.479 : #$ Electron Endcap cuts
                                                                             
-                        goodElectron = \
-                          abs(  ieEtaIn  ) < 0.0106 and \
-                          abs(iePhiIn) < 0.0359 and \
-                          iefull < 0.0305 and \
-                          ieHoE < 0.0835 and \
-                          abs(ieD0) < 0.0163 and \
-                          abs(ieDz) < .5999 and \
-                          abs(ieooEmooP) < 0.1126 and \
-                          iepass
+                    ##     goodElectron = \
+                    ##       abs(  ieEtaIn  ) < 0.009285 and \
+                    ##       abs(iePhiIn) < 0.042447 and \
+                    ##       iefull < 0.029524 and \
+                    ##       ieHoE < 0.104263 and \
+                    ##       abs(ieD0) < 0.051682 and \
+                    ##       abs(ieDz) < 0.180720 and \
+                    ##       abs(ieooEmooP) < 0.137468 #and \
+                    ##       #iepass
 
                      
-                    
+                    goodElectron = electronTight[ ielectron ]
                     if goodElectron == True :
                         goodelectronPt.append( iePt )
                         goodelectronEta.append( ieEta )
@@ -619,9 +622,8 @@ for ifile in files : #{ Loop over root files
                         goodelectronMass.append( ieMass )
                         goodelectronKey.append( elKey[ielectron] )
                         goodelectronCharge.append( ieCharge )
-                        #if options.verbose : #!!! Need to add this back in 
-
-                            #print "elec %2d: key %4d, pt %4.1f, supercluster eta %+5.3f, phi %+5.3f sigmaIetaIeta %.3f (%.3f with full5x5 shower shapes), pass conv veto %d" % ( i, elKey[i], electronPt[i], electronSCeta, electronPhi[i], electron.sigmaIetaIeta(), full5x5_sigmaIetaIeta, passConversionVeto)
+                        if options.verbose : #!!! Need to add this back in 
+                            print "elec %2d: key %4d, pt %4.1f, eta %4.1f, phi %+5.3f " % ( ielectron, elKey[ielectron], electronPt[ielectron], electronEta[ielectron], electronPhi[ielectron] )
                     
                     #} End Electron Loop
 
