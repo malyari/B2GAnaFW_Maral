@@ -760,10 +760,15 @@ for ifile in files : #{ Loop over root files
         # lepton and nearest jet that has pt > 30 GeV
         dRMin = 9999.0
         dR2Min = 9999.0
+        dRMinsave = 9999.0
         inearestJet = -1    # Index of nearest jet
         i2nearestJet = -1
+        inearestJetsave = -1 # Index to save for dilepton channel in case  jet is closer to other lepton
         nearest2JetMass = None
         nearestJetMass = None   # Nearest jet
+        nearestJetP4 = None
+        nearest2JetP4 = None
+        nearestJetbDiscrim = 0.0
 
         if len(h_jetsAK4Pt.product()) > 0 :
             AK4Pt = h_jetsAK4Pt.product()
@@ -921,15 +926,33 @@ for ifile in files : #{ Loop over root files
                     nearestJetbDiscrim = AK4CSV[i]
             elif Leptonic :
                 if dR1 < dRMin :
+                    #Save in case duplicate bjets
+                    inearestJetsave = inearestJet
+                    nearestJetP4save = nearestJetP4
+                    dRMinsave = dRMin
+                    nearestJetbDiscrimsave = nearestJetbDiscrim
+                    
                     inearestJet = i
                     nearestJetP4 = jetP4
                     dRMin = dR1
                     nearestJetbDiscrim = AK4CSV[i]
                 if dR2 < dR2Min :
-                    i2nearestJet = i
-                    nearest2JetP4 = jetP4
-                    dR2Min = dR2
-                    nearest2JetbDiscrim = AK4CSV[i]
+                    if i == inearestJet :
+                        if dR2 < dR1 :
+                            i2nearestJet = i
+                            nearest2JetP4 = jetP4
+                            dR2Min = dR2
+                            nearest2JetbDiscrim = AK4CSV[i]
+
+                            inearestJet = inearestJetsave
+                            nearestJetP4 = nearestJetP4save
+                            dRMin = dRMinsave
+                            nearestJetbDiscrim = nearestJetbDiscrimsave
+                    else :
+                        i2nearestJet = i
+                        nearest2JetP4 = jetP4
+                        dR2Min = dR2
+                        nearest2JetbDiscrim = AK4CSV[i]
                 
             #} End AK4Jet Loop
 
