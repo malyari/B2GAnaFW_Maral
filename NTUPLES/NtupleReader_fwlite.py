@@ -1318,14 +1318,23 @@ for ifile in files : #{ Loop over root files
                 nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
                 #!!! This part is fairly strange to me, just add all 4 vectors together
                 ttbarCandP4 = nuCandP4 + Lepton1 + Lepton2 + bJetCandP4 + bJetCand2P4
-
-            
+                if ttbarCandP4.M() < 1000.0 :
+                    print '   Lepton1 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        Lepton1.Perp(), Lepton1.Rapidity(), Lepton1.Phi(), Lepton1.M())
+                    print '   Lepton2 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        Lepton2.Perp(), Lepton2.Rapidity(), Lepton2.Phi(), Lepton2.M())
+                    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M())
+                    print '   bJetCand2P4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        bJetCand2P4.Perp(), bJetCand2P4.Rapidity(), bJetCand2P4.Phi(), bJetCand2P4.M())
+                    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M())
         
         #@ Semileptonic
         elif SemiLeptonic == True and nttags >= 1 :    
             hadTopCandP4 = tJets[0]
             lepTopCandP4 = None
-
+            
             #$ Check if the nearest jet to the lepton is b-tagged
             if theLepJetBDisc < options.bDiscMin :
                 if options.verbose : 
@@ -1360,6 +1369,18 @@ for ifile in files : #{ Loop over root files
                     eleJetsEvents += 1
 
                 lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
+
+                ttbarCandP4 = None
+                ttbarCandP4 = hadTopCandP4 + lepTopCandP4
+                if ttbarCandP4.M() < 1000.0 :
+                    print '   theLepton pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        theLepton.Perp(), theLepton.Rapidity(), theLepton.Phi(), theLepton.M())
+                    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M())
+                    print '   hadTopCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        hadTopCandP4.Perp(), hadTopCandP4.Rapidity(), hadTopCandP4.Phi(), hadTopCandP4.M())
+                    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M())
         
         #@ Hadronic
         elif Hadronic and nttags >= 2 : # $$$
