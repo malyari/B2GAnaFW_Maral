@@ -760,10 +760,15 @@ for ifile in files : #{ Loop over root files
         # lepton and nearest jet that has pt > 30 GeV
         dRMin = 9999.0
         dR2Min = 9999.0
+        dRMinsave = 9999.0
         inearestJet = -1    # Index of nearest jet
         i2nearestJet = -1
+        inearestJetsave = -1 # Index to save for dilepton channel in case  jet is closer to other lepton
         nearest2JetMass = None
         nearestJetMass = None   # Nearest jet
+        nearestJetP4 = None
+        nearest2JetP4 = None
+        nearestJetbDiscrim = 0.0
 
         if len(h_jetsAK4Pt.product()) > 0 :
             AK4Pt = h_jetsAK4Pt.product()
@@ -921,15 +926,33 @@ for ifile in files : #{ Loop over root files
                     nearestJetbDiscrim = AK4CSV[i]
             elif Leptonic :
                 if dR1 < dRMin :
+                    #Save in case duplicate bjets
+                    inearestJetsave = inearestJet
+                    nearestJetP4save = nearestJetP4
+                    dRMinsave = dRMin
+                    nearestJetbDiscrimsave = nearestJetbDiscrim
+                    
                     inearestJet = i
                     nearestJetP4 = jetP4
                     dRMin = dR1
                     nearestJetbDiscrim = AK4CSV[i]
                 if dR2 < dR2Min :
-                    i2nearestJet = i
-                    nearest2JetP4 = jetP4
-                    dR2Min = dR2
-                    nearest2JetbDiscrim = AK4CSV[i]
+                    if i == inearestJet :
+                        if dR2 < dR1 :
+                            i2nearestJet = i
+                            nearest2JetP4 = jetP4
+                            dR2Min = dR2
+                            nearest2JetbDiscrim = AK4CSV[i]
+
+                            inearestJet = inearestJetsave
+                            nearestJetP4 = nearestJetP4save
+                            dRMin = dRMinsave
+                            nearestJetbDiscrim = nearestJetbDiscrimsave
+                    else :
+                        i2nearestJet = i
+                        nearest2JetP4 = jetP4
+                        dR2Min = dR2
+                        nearest2JetbDiscrim = AK4CSV[i]
                 
             #} End AK4Jet Loop
 
@@ -989,7 +1012,7 @@ for ifile in files : #{ Loop over root files
             h_dRMin.Fill( dRMin )
             h_2DCut.Fill( dRMin, ptRel )
 
-
+            
             #@ 2D Cuts
             pass2D = ptRel > 20.0 or dRMin > 0.4
             if options.verbose :
@@ -1017,7 +1040,7 @@ for ifile in files : #{ Loop over root files
             h_ptRel.Fill( ptRel )
             h_dRMin.Fill( dRMin )
             h_2DCut.Fill( dRMin, ptRel )
-
+            
             #@ First Lepton 2D Cuts
             pass2D = ptRel > 20.0 or dRMin > 0.4
             if options.verbose :
@@ -1043,8 +1066,7 @@ for ifile in files : #{ Loop over root files
             h_ptRel.Fill( ptRel )
             h_dRMin.Fill( dR2Min )
             h_2DCut.Fill( dR2Min, ptRel )
-                                    
-
+            
             #@ Second Lepton 2D Cuts
             pass2D = ptRel2 > 20.0 or dR2Min > 0.4
             if options.verbose :
@@ -1315,17 +1337,44 @@ for ifile in files : #{ Loop over root files
                 bJetCandP4 = theLepJet
                 bJetCand2P4 = theLepJet2
                 
-                nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
+                nuCandP4 = ROOT.TLorentzVector()#(metPx, metPy ,0.0, metPt)
+                nuCandP4.SetPxPyPzE(metPx, metPy, 0.0, metPt)
                 #!!! This part is fairly strange to me, just add all 4 vectors together
                 ttbarCandP4 = nuCandP4 + Lepton1 + Lepton2 + bJetCandP4 + bJetCand2P4
-
-            
-        
+                #if ttbarCandP4.M() < 1000.0 :
+                #    print ' ================'
+                #    print ' Low Mass Values '
+                #    print ' '
+                #    print '   Lepton1 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        Lepton1.Perp(), Lepton1.Rapidity(), Lepton1.Phi(), Lepton1.M())
+                #    print '   Lepton2 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        Lepton2.Perp(), Lepton2.Rapidity(), Lepton2.Phi(), Lepton2.M())
+                #    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M())
+                #    print '   bJetCand2P4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        bJetCand2P4.Perp(), bJetCand2P4.Rapidity(), bJetCand2P4.Phi(), bJetCand2P4.M())
+                #    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, px = {4:6.2f}, py = {5:6.2f}'.format (
+                #        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M(), nuCandP4.Px(), nuCandP4.Py())
+                #else :
+                #    print ' ================'
+                #    print ' Normal Mass Values '
+                #    print ' '
+                #    print '   Lepton1 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        Lepton1.Perp(), Lepton1.Rapidity(), Lepton1.Phi(), Lepton1.M())
+                #    print '   Lepton2 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        Lepton2.Perp(), Lepton2.Rapidity(), Lepton2.Phi(), Lepton2.M())
+                #    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M())
+                #    print '   bJetCand2P4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                #        bJetCand2P4.Perp(), bJetCand2P4.Rapidity(), bJetCand2P4.Phi(), bJetCand2P4.M())
+                #    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, px = {4:6.2f}, py = {5:6.2f}'.format (
+                #        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M(), nuCandP4.Px(), nuCandP4.Py())
+                    
         #@ Semileptonic
         elif SemiLeptonic == True and nttags >= 1 :    
-            hadTopCandP4 = tJets[0]
+            hadTopCandP4 = tJets[0] 
             lepTopCandP4 = None
-
+            
             #$ Check if the nearest jet to the lepton is b-tagged
             if theLepJetBDisc < options.bDiscMin :
                 if options.verbose : 
@@ -1340,8 +1389,9 @@ for ifile in files : #{ Loop over root files
                 
                 bJetCandP4 = theLepJet
                 
-                nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
-
+                #nuCandP4 = ROOT.TLorentzVector(metPx, metPy ,0.0, metPt)
+                nuCandP4 = ROOT.TLorentzVector()#(metPx, metPy ,0.0, metPt)
+                nuCandP4.SetPxPyPzE(metPx, metPy, 0.0, metPt)
                 solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
                 # If there is at least one real solution, pick it up
                 # If there is at least one real solution, pick it up
@@ -1360,7 +1410,34 @@ for ifile in files : #{ Loop over root files
                     eleJetsEvents += 1
 
                 lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
-        
+
+                ttbarCandP4 = None
+                ttbarCandP4 = hadTopCandP4 + lepTopCandP4
+                #if ttbarCandP4.M() < 1000.0 :
+                #    print ' ================'
+                #    print ' Low Mass Values '
+                #    print ' '
+                #    print '   theLepton pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f}'.format (
+                #        theLepton.Perp(), theLepton.Rapidity(), theLepton.Phi(), theLepton.M(), theLepton.E())
+                #    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f} '.format (
+                #        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M(), bJetCandP4.E())
+                #    print '   hadTopCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f} '.format (
+                #        hadTopCandP4.Perp(), hadTopCandP4.Rapidity(), hadTopCandP4.Phi(), hadTopCandP4.M(), hadTopCandP4.E())
+                #    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f}'.format (
+                #        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M(), nuCandP4.E())
+                #else :
+                #    print ' ================'
+                #    print ' Normal Mass Values '
+                #    print ' '
+                #    print '   theLepton pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f} '.format (
+                #    theLepton.Perp(), theLepton.Rapidity(), theLepton.Phi(), theLepton.M(), theLepton.E())
+                #    print '   bJetCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f}'.format (
+                #        bJetCandP4.Perp(), bJetCandP4.Rapidity(), bJetCandP4.Phi(), bJetCandP4.M(), bJetCandP4.E())
+                #    print '   hadTopCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f}'.format (
+                #        hadTopCandP4.Perp(), hadTopCandP4.Rapidity(), hadTopCandP4.Phi(), hadTopCandP4.M(), hadTopCandP4.E())
+                #    print '   nuCandP4 pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}, E = {4:6.2f}'.format (
+                #        nuCandP4.Perp(), nuCandP4.Rapidity(), nuCandP4.Phi(), nuCandP4.M(), nuCandP4.E())
+                        
         #@ Hadronic
         elif Hadronic and nttags >= 2 : # $$$
             hadTopCand1P4 = tJets[0]
