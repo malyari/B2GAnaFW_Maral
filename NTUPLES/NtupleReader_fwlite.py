@@ -557,63 +557,10 @@ for ifile in files : #{ Loop over root files
                     iePt = electronPt[ielectron]   
                     ieEta = electronEta[ielectron]
                     iePhi = electronPhi[ielectron]
-                    ieEtaIn = electrondEtaIn[ielectron]
-                    iePhiIn = electronPhi[ielectron]
-                    ietight = electronTight[ielectron]
-                    ieloose = electronLoose[ielectron]
-                    ieEcal = electronecalEnergy[ielectron]
-                    ieooEmooP = electronooEmooP[ielectron]
-                    ieD0 = electronD0[ielectron]
-                    ieDz = electronDz[ielectron]
                     ieMass = electronMass[ielectron]
-                    pfIso = electronabsiso[ielectron]
-                    ielscEta = electronscEta[ielectron]
                     ieCharge = electronCharge[ielectron]
                     if iePt < iePt and abs(ieEta) < options.maxElectronEta : #$ Electron eta cut (based on options)
-                        continue
-                    ieHoE = electronHoE[ielectron]
-                
-                    iefull = electronfullsiee[ielectron]
-                                                    
-                    ieabsiso = abs(pfIso)
-                
-                    if abs(ieEcal) < 0.0 :
-                        ieooEmooP = 1.0e30
-                                        
-                    relIso = ieabsiso / iePt
-                    iepass = passConversionVeto[ielectron]
-    
-                    ## goodElectron = False
-                    ## # Barrel ECAL cuts
-                    ## # "Medium" operating point from
-                    ## # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
-                    ## # (mostly)
-                    ## if abs(ielscEta) < 1.479 : #$ Electron Barrel Cuts ( will skip electron if this isn't passed )
-                    ##     goodElectron = \
-                    ##       abs( ieEtaIn ) < 0.007641 and \
-                    ##       abs( iePhiIn ) < 0.032643 and \
-                    ##       iefull < 0.010399	 and \
-                    ##       ieHoE < 0.060662 and \
-                    ##       abs(ieD0) < 0.011811 and \
-                    ##       abs(ieDz) < 0.070775 and \
-                    ##       abs( ieooEmooP ) < 0.153897 #and \
-                    ##       #iepass
-                                                                        
-                                                                        
-                    ## # Endcap ECAL cuts
-                    ## elif abs(ielscEta) < 2.5 and abs(ielscEta) > 1.479 : #$ Electron Endcap cuts
-                                                                            
-                    ##     goodElectron = \
-                    ##       abs(  ieEtaIn  ) < 0.009285 and \
-                    ##       abs(iePhiIn) < 0.042447 and \
-                    ##       iefull < 0.029524 and \
-                    ##       ieHoE < 0.104263 and \
-                    ##       abs(ieD0) < 0.051682 and \
-                    ##       abs(ieDz) < 0.180720 and \
-                    ##       abs(ieooEmooP) < 0.137468 #and \
-                    ##       #iepass
-
-                     
+                        continue                     
                     goodElectron = electronTight[ ielectron ]
                     if goodElectron == True :
                         goodelectronPt.append( iePt )
@@ -1321,7 +1268,7 @@ for ifile in files : #{ Loop over root files
             if theLepJetBDisc < options.bDiscMin and theLepJetBDisc2 < options.bDiscMin :
                 if options.verbose : 
                     print 'closest jet to lepton is not b-tagged'
-                    
+                    #!!! Eventually we should make 0-btag categories. 
                 continue
             else  :
 
@@ -1394,7 +1341,11 @@ for ifile in files : #{ Loop over root files
                 nuCandP4.SetPxPyPzE(metPx, metPy, 0.0, metPt)
                 solution, nuz1, nuz2 = solve_nu( vlep=theLepton, vnu=nuCandP4 )
                 # If there is at least one real solution, pick it up
-                # If there is at least one real solution, pick it up
+
+
+                
+
+                
                 if solution :
                     if options.verbose : 
                         print '--- Have a solution --- '
@@ -1411,9 +1362,11 @@ for ifile in files : #{ Loop over root files
 
                 lepTopCandP4 = nuCandP4 + theLepton + bJetCandP4
 
-                ttbarCandP4 = None
-                ttbarCandP4 = hadTopCandP4 + lepTopCandP4
+
+
+                
                 #if ttbarCandP4.M() < 1000.0 :
+                #    print 'Weird event : ' + str(event.object().id().luminosityBlock()) + ', ' + str(event.object().id().event())
                 #    print ' ================'
                 #    print ' Low Mass Values '
                 #    print ' '
@@ -1449,12 +1402,18 @@ for ifile in files : #{ Loop over root files
         
         #^ Plot for ttbar Candidate Mass
         ttbarCand = None
-                        
+
+
+        #!!! We need to eventually fix this so that we don't just
+        #!!! throw away events that are not back-to-back. My feeling is that the events
+        #!!! with ttbar systems that are boosted (due to ISR) will be
+        #!!! background-enriched in any case. Food for thought. 
+                                
         if Hadronic == True and nttags >= 2 : 
             ttbarCand = hadTopCand1P4 + hadTopCand2P4
         if Leptonic == True  : 
             ttbarCand = ttbarCandP4
-        if SemiLeptonic == True and nttags >= 1 :
+        if SemiLeptonic == True and nttags >= 1 and hadTopCandP4.DeltaR( lepTopCandP4) > 2.0:
             ttbarCand = hadTopCandP4 + lepTopCandP4
 
         if ttbarCand != None : 
