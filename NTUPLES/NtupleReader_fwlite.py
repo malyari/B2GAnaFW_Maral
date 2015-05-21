@@ -325,15 +325,15 @@ l_jetsAK8TopSubjetIndex3 = ("jetsAK8", "jetAK8topSubjetIndex3")
 
 
 h_subjetsAK8BDisc = Handle( "std::vector<float>")
-l_subjetsAK8BDisc = ("subjetsCmsTopTag", "subjetsCmsTopTagsubjetCSVV1")
+l_subjetsAK8BDisc = ("subjetsCmsTopTag", "subjetCmsTopTagCSV")
 h_subjetsAK8Pt = Handle( "std::vector<float>")
-l_subjetsAK8Pt = ("subjetsCmsTopTag", "subjetsCmsTopTagPt")
+l_subjetsAK8Pt = ("subjetsCmsTopTag", "subjetCmsTopTagPt")
 h_subjetsAK8Eta = Handle( "std::vector<float>")
-l_subjetsAK8Eta = ("subjetsCmsTopTag", "subjetsCmsTopTagEta")
+l_subjetsAK8Eta = ("subjetsCmsTopTag", "subjetCmsTopTagEta")
 h_subjetsAK8Phi = Handle( "std::vector<float>")
-l_subjetsAK8Phi = ("subjetsCmsTopTag", "subjetsCmsTopTagPhi")
+l_subjetsAK8Phi = ("subjetsCmsTopTag", "subjetCmsTopTagPhi")
 h_subjetsAK8Mass = Handle( "std::vector<float>")
-l_subjetsAK8Mass = ("subjetsCmsTopTag", "subjetsCmsTopTagMass")
+l_subjetsAK8Mass = ("subjetsCmsTopTag", "subjetCmsTopTagMass")
 
 
 
