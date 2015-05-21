@@ -109,7 +109,7 @@ parser.add_option('--mAK8TrimmedCut', type='float', action='store',
                   help='Trimmed mass Cut for CMS Combined Tagger')
 
 parser.add_option('--tau32Cut', type='float', action='store',
-                  default=100.,
+                  default=0.6,
                   dest='tau32Cut',
                   help='Tau3 / Tau2 n-subjettiness cut for CMS Combined Tagger')
 
@@ -308,7 +308,34 @@ h_jetsAK8Area = Handle("std::vector<float>")
 l_jetsAK8Area = ( "jetsAK8" , "jetAK8jetArea" )
 
 
-#@ HISTOGRAMS
+h_jetsAK8VSubjetIndex0 = Handle("std::vector<float>")
+l_jetsAK8VSubjetIndex0 = ("jetsAK8", "jetAK8vSubjetIndex0")
+h_jetsAK8VSubjetIndex1 = Handle("std::vector<float>")
+l_jetsAK8VSubjetIndex1 = ("jetsAK8", "jetAK8vSubjetIndex1")
+
+h_jetsAK8TopSubjetIndex0 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex0 = ("jetsAK8", "jetAK8topSubjetIndex0")
+h_jetsAK8TopSubjetIndex1 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex1 = ("jetsAK8", "jetAK8topSubjetIndex1")
+h_jetsAK8TopSubjetIndex2 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex2 = ("jetsAK8", "jetAK8topSubjetIndex2")
+h_jetsAK8TopSubjetIndex3 = Handle("std::vector<float>")
+l_jetsAK8TopSubjetIndex3 = ("jetsAK8", "jetAK8topSubjetIndex3")
+
+
+
+h_subjetsAK8BDisc = Handle( "std::vector<float>")
+l_subjetsAK8BDisc = ("subjetsCmsTopTag", "subjetsCmsTopTagsubjetCSVV1")
+h_subjetsAK8Pt = Handle( "std::vector<float>")
+l_subjetsAK8Pt = ("subjetsCmsTopTag", "subjetsCmsTopTagPt")
+h_subjetsAK8Eta = Handle( "std::vector<float>")
+l_subjetsAK8Eta = ("subjetsCmsTopTag", "subjetsCmsTopTagEta")
+h_subjetsAK8Phi = Handle( "std::vector<float>")
+l_subjetsAK8Phi = ("subjetsCmsTopTag", "subjetsCmsTopTagPhi")
+h_subjetsAK8Mass = Handle( "std::vector<float>")
+l_subjetsAK8Mass = ("subjetsCmsTopTag", "subjetsCmsTopTagMass")
+
+
 
 f = ROOT.TFile(options.outname, "RECREATE")
 f.cd()
@@ -939,6 +966,88 @@ for ifile in files : #{ Loop over root files
         metPy = h_metPy.product()[0]
         metPhi = h_metPhi.product()[0]
         metPt = h_metPt.product()[0]
+
+        event.getByLabel ( l_jetsAK8Eta, h_jetsAK8Eta )
+        event.getByLabel ( l_jetsAK8Pt, h_jetsAK8Pt )
+        event.getByLabel ( l_jetsAK8Phi, h_jetsAK8Phi )
+        event.getByLabel ( l_jetsAK8Mass, h_jetsAK8Mass )
+        event.getByLabel ( l_jetsAK8Energy, h_jetsAK8Energy )
+        event.getByLabel ( l_jetsAK8JEC, h_jetsAK8JEC )
+        event.getByLabel ( l_jetsAK8Y, h_jetsAK8Y )
+        event.getByLabel ( l_jetsAK8Area, h_jetsAK8Area )
+
+        event.getByLabel ( l_jetsAK8TrimMass, h_jetsAK8TrimMass )
+        event.getByLabel ( l_jetsAK8PrunMass, h_jetsAK8PrunMass )
+        event.getByLabel ( l_jetsAK8FiltMass, h_jetsAK8FiltMass )
+        event.getByLabel ( l_jetsAK8Tau1, h_jetsAK8Tau1 )
+        event.getByLabel ( l_jetsAK8Tau2, h_jetsAK8Tau2 )
+        event.getByLabel ( l_jetsAK8Tau3, h_jetsAK8Tau3 )
+        event.getByLabel ( l_jetsAK8nSubJets, h_jetsAK8nSubJets )
+        event.getByLabel ( l_jetsAK8minmass, h_jetsAK8minmass )
+
+        event.getByLabel ( l_jetsAK8TopSubjetIndex0, h_jetsAK8TopSubjetIndex0 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex1, h_jetsAK8TopSubjetIndex1 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex2, h_jetsAK8TopSubjetIndex2 )
+        event.getByLabel ( l_jetsAK8TopSubjetIndex3, h_jetsAK8TopSubjetIndex3 )
+
+        event.getByLabel ( l_subjetsAK8BDisc, h_subjetsAK8BDisc)
+        event.getByLabel ( l_subjetsAK8Pt, h_subjetsAK8Pt)
+        event.getByLabel ( l_subjetsAK8Eta, h_subjetsAK8Eta)
+        event.getByLabel ( l_subjetsAK8Phi, h_subjetsAK8Phi)
+        
+        ak8JetsGood = []
+        ak8JetsGoodTrimMass = []
+        ak8JetsGoodPrunMass = []
+        ak8JetsGoodFiltMass = []
+        ak8JetsGoodTau1 = []
+        ak8JetsGoodTau2 = []
+        ak8JetsGoodTau3 = []
+        ak8JetsGoodNSubJets = []
+        ak8JetsGoodMinMass = []
+        ak8JetsGoodTopSubjetIndex0 = []
+        ak8JetsGoodTopSubjetIndex1 = []
+        ak8JetsGoodTopSubjetIndex2 = []
+        ak8JetsGoodTopSubjetIndex3 = []
+
+
+        if len( h_jetsAK8Pt.product()) > 0 : 
+            AK8Pt = h_jetsAK8Pt.product()
+            AK8Eta = h_jetsAK8Eta.product()
+            AK8Phi = h_jetsAK8Phi.product()
+            AK8Mass = h_jetsAK8Mass.product()
+            AK8Energy = h_jetsAK8Energy.product()
+            AK8Y = h_jetsAK8Y.product()
+
+            AK8JEC = h_jetsAK8JEC.product()
+            AK8Area = h_jetsAK8Area.product()
+
+
+            AK8TrimmedM = h_jetsAK8TrimMass.product()
+            AK8PrunedM = h_jetsAK8PrunMass.product()
+            AK8FilteredM = h_jetsAK8FiltMass.product()
+            AK8Tau1 = h_jetsAK8Tau1.product()
+            AK8Tau2 = h_jetsAK8Tau2.product()
+            AK8Tau3 = h_jetsAK8Tau3.product()
+            AK8nSubJets = h_jetsAK8nSubJets.product()
+            AK8minmass = h_jetsAK8minmass.product()
+            AK8TopSubjetIndex0 = h_jetsAK8TopSubjetIndex0.product()
+            AK8TopSubjetIndex1 = h_jetsAK8TopSubjetIndex1.product()
+            AK8TopSubjetIndex2 = h_jetsAK8TopSubjetIndex2.product()
+            AK8TopSubjetIndex3 = h_jetsAK8TopSubjetIndex3.product()
+
+
+            
+        ak8SubJetsBDisc = []
+        ak8SubJetsPt = []
+        ak8SubJetsEta = []
+        ak8SubJetsPhi = []
+        
+        if len( h_subjetsAK8BDisc.product() ) > 0 : 
+            AK8SubJetsBDisc = h_subjetsAK8BDisc.product()
+            AK8SubJetsPt = h_subjetsAK8Pt.product()
+            AK8SubJetsEta = h_subjetsAK8Eta.product()
+            AK8SubJetsPhi = h_subjetsAK8Phi.product()
+
         
         #^ Plotting for SemiLeptonic Channel pre 2D cuts
         if SemiLeptonic : 
@@ -969,6 +1078,7 @@ for ifile in files : #{ Loop over root files
             if pass2D == False :
                 continue
 
+
         #^ Plotting for DiLeptonic Channel pre 2D cuts
         elif Leptonic :
             theLepJet = nearestJetP4
@@ -990,6 +1100,7 @@ for ifile in files : #{ Loop over root files
             
             #@ First Lepton 2D Cuts
             pass2D = ptRel > 20.0 or dRMin > 0.4
+
             if options.verbose :
                 print '>>>>>>>>>>>>>>'
                 print '2d cut 1 : dRMin = {0:6.2f}, ptRel = {1:6.2f}'.format( dRMin, ptRel )
@@ -1071,6 +1182,11 @@ for ifile in files : #{ Loop over root files
             ak8JetsGoodTau3 = []
             ak8JetsGoodNSubJets = []
             ak8JetsGoodMinMass = []
+            ak8JetsGoodTopSubjetIndex0 = []
+            ak8JetsGoodTopSubjetIndex1 = []
+            ak8JetsGoodTopSubjetIndex2 = []
+            ak8JetsGoodTopSubjetIndex3 = []            
+            
 
             if len( h_jetsAK8Pt.product()) > 0 : 
                 AK8Pt = h_jetsAK8Pt.product()
@@ -1100,6 +1216,10 @@ for ifile in files : #{ Loop over root files
                 AK8Tau3 = h_jetsAK8Tau3.product()
                 AK8nSubJets = h_jetsAK8nSubJets.product()
                 AK8minmass = h_jetsAK8minmass.product()
+                AK8TopSubjetIndex0 = h_jetsAK8TopSubjetIndex0.product()
+                AK8TopSubjetIndex1 = h_jetsAK8TopSubjetIndex1.product()
+                AK8TopSubjetIndex2 = h_jetsAK8TopSubjetIndex2.product()
+                AK8TopSubjetIndex3 = h_jetsAK8TopSubjetIndex3.product()
 
                 AK8Keys = h_jetsAK8Keys.product()
 
@@ -1175,6 +1295,10 @@ for ifile in files : #{ Loop over root files
                         ak8JetsGoodTau3.append( AK8Tau3[i])
                         ak8JetsGoodNSubJets.append( AK8nSubJets[i])
                         ak8JetsGoodMinMass.append( AK8minmass[i] )
+                        ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
+                        ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
+                        ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
+                        ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )
                 #$ Cuts for Hadronic channel
                 else : 
                     ## HADRONIC CHANNEL CRITERIA 
@@ -1192,6 +1316,10 @@ for ifile in files : #{ Loop over root files
                         ak8JetsGoodTau3.append( AK8Tau3[i])
                         ak8JetsGoodNSubJets.append( AK8nSubJets[i])
                         ak8JetsGoodMinMass.append( AK8minmass[i] )
+                        ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
+                        ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
+                        ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
+                        ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )                        
                     #} End AK8 Loop
 
             #@ Tagging
@@ -1266,6 +1394,7 @@ for ifile in files : #{ Loop over root files
 
             #$ Check if the nearest jets to the leptons are b-tagged
             if theLepJetBDisc < options.bDiscMin and theLepJetBDisc2 < options.bDiscMin :
+
                 if options.verbose : 
                     print 'closest jet to lepton is not b-tagged'
                     #!!! Eventually we should make 0-btag categories. 
