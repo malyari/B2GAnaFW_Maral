@@ -1228,99 +1228,99 @@ for ifile in files : #{ Loop over root files
                     print 'N AK8 keys = ' + str( len(AK8Keys)) + ', N AK8Pt = ' + str(len(AK8Pt))
 
 
-            for i in range(0,len(AK8Pt)):#{ Loop over AK8 Jets
+                for i in range(0,len(AK8Pt)):#{ Loop over AK8 Jets
 
-                AK8JECFromB2GAnaFW = AK8JEC[i]   
-                AK8P4Raw = ROOT.TLorentzVector()
-                AK8P4Raw.SetPtEtaPhiM( AK8Pt[i] , AK8Eta[i], AK8Phi[i], AK8Mass[i])
-                # Remove the old JEC's to get raw energy
-                AK8P4Raw *= AK8JECFromB2GAnaFW 
+                    AK8JECFromB2GAnaFW = AK8JEC[i]   
+                    AK8P4Raw = ROOT.TLorentzVector()
+                    AK8P4Raw.SetPtEtaPhiM( AK8Pt[i] , AK8Eta[i], AK8Phi[i], AK8Mass[i])
+                    # Remove the old JEC's to get raw energy
+                    AK8P4Raw *= AK8JECFromB2GAnaFW 
 
-                #$ Cut based on charged and neutral energy for AK8 jets
-                nhf = AK8nHadE[i] / AK8P4Raw.E()
-                nef = AK8nEME[i] / AK8P4Raw.E()
-                chf = AK8cHadE[i] / AK8P4Raw.E()
-                cef = AK8cEME[i] / AK8P4Raw.E()
-                nconstituents = AK8numDaughters[i]
-                nch = AK8cMultip[i] 
-                goodJet = \
-                  nhf < 0.99 and \
-                  nef < 0.99 and \
-                  chf > 0.00 and \
-                  cef < 0.99 and \
-                  nconstituents > 1 and \
-                  nch > 0
+                    #$ Cut based on charged and neutral energy for AK8 jets
+                    nhf = AK8nHadE[i] / AK8P4Raw.E()
+                    nef = AK8nEME[i] / AK8P4Raw.E()
+                    chf = AK8cHadE[i] / AK8P4Raw.E()
+                    cef = AK8cEME[i] / AK8P4Raw.E()
+                    nconstituents = AK8numDaughters[i]
+                    nch = AK8cMultip[i] 
+                    goodJet = \
+                      nhf < 0.99 and \
+                      nef < 0.99 and \
+                      chf > 0.00 and \
+                      cef < 0.99 and \
+                      nconstituents > 1 and \
+                      nch > 0
 
-                if not goodJet :
-                    if options.verbose : 
-                        print '   bad jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                    if not goodJet :
+                        if options.verbose : 
+                            print '   bad jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
+                                AK8P4Raw.Perp(), AK8P4Raw.Rapidity(), AK8P4Raw.Phi(), AK8P4Raw.M()
+                                )
+                        continue
+                    if options.verbose :
+                        print '   raw jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
                             AK8P4Raw.Perp(), AK8P4Raw.Rapidity(), AK8P4Raw.Phi(), AK8P4Raw.M()
                             )
-                    continue
-                if options.verbose :
-                    print '   raw jet pt = {0:6.2f}, y = {1:6.2f}, phi = {2:6.2f}, m = {3:6.2f}'.format (
-                        AK8P4Raw.Perp(), AK8P4Raw.Rapidity(), AK8P4Raw.Phi(), AK8P4Raw.M()
-                        )
 
-                #@ JEC Scaling for AK8 Jets
-                ak8JetCorrector.setJetEta( AK8P4Raw.Eta() )
-                ak8JetCorrector.setJetPt ( AK8P4Raw.Perp() )
-                ak8JetCorrector.setJetE  ( AK8P4Raw.E() )
-                ak8JetCorrector.setJetA  ( AK8Area[i] )
-                ak8JetCorrector.setRho   ( rho )
-                ak8JetCorrector.setNPV   ( NPV )
-                newJEC = ak8JetCorrector.getCorrection()
-                AK8P4Corr = AK8P4Raw*newJEC
+                    #@ JEC Scaling for AK8 Jets
+                    ak8JetCorrector.setJetEta( AK8P4Raw.Eta() )
+                    ak8JetCorrector.setJetPt ( AK8P4Raw.Perp() )
+                    ak8JetCorrector.setJetE  ( AK8P4Raw.E() )
+                    ak8JetCorrector.setJetA  ( AK8Area[i] )
+                    ak8JetCorrector.setRho   ( rho )
+                    ak8JetCorrector.setNPV   ( NPV )
+                    newJEC = ak8JetCorrector.getCorrection()
+                    AK8P4Corr = AK8P4Raw*newJEC
 
 
 
-                #$ Cuts based on pt and rapidity
-                if AK8P4Raw.Perp() < options.minAK8Pt or abs(AK8P4Raw.Rapidity()) > options.maxAK8Rapidity :
-                    continue
+                    #$ Cuts based on pt and rapidity
+                    if AK8P4Raw.Perp() < options.minAK8Pt or abs(AK8P4Raw.Rapidity()) > options.maxAK8Rapidity :
+                        continue
 
-                # SemiLeptonic- Only keep AK8 jets "away" from the lepton, so we do not need lepton-jet cleaning here. There's no double counting. 
-                # Leptonic - No fat jets                                                                          
-                # Hadronic - 2 AK8's, no massy leptons to clean up after
+                    # SemiLeptonic- Only keep AK8 jets "away" from the lepton, so we do not need lepton-jet cleaning here. There's no double counting. 
+                    # Leptonic - No fat jets                                                                          
+                    # Hadronic - 2 AK8's, no massy leptons to clean up after
 
-                #$ Cuts for fat jets that are far away from the leptons
-                if SemiLeptonic == True:
-                    dR = jetP4.DeltaR(theLepton ) 
-                    if dR > ROOT.TMath.Pi()/2.0 :
-                        ak8JetsGood.append(AK8P4Corr)
-                        ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
-                        ak8JetsGoodPrunMass.append( AK8PrunedM[i])
-                        ak8JetsGoodFiltMass.append( AK8FilteredM[i])
-                        ak8JetsGoodTau1.append( AK8Tau1[i])
-                        ak8JetsGoodTau2.append( AK8Tau2[i])
-                        ak8JetsGoodTau3.append( AK8Tau3[i])
-                        ak8JetsGoodNSubJets.append( AK8nSubJets[i])
-                        ak8JetsGoodMinMass.append( AK8minmass[i] )
-                        ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
-                        ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
-                        ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
-                        ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )
-                #$ Cuts for Hadronic channel
-                else : 
-                    ## HADRONIC CHANNEL CRITERIA 
-    
-                    # - minimum mass pairing > 50 GeV
-                    # - number of Subjets >= 3
-                    # - Jet Mass > 100 GeV
-                    if AK8nSubJets[i] >= 3 and AK8minmass[i] > 50 and AK8P4Corr.M() > 100 :
-                        ak8JetsGood.append(AK8P4Corr)
-                        ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
-                        ak8JetsGoodPrunMass.append( AK8PrunedM[i])
-                        ak8JetsGoodFiltMass.append( AK8FilteredM[i])
-                        ak8JetsGoodTau1.append( AK8Tau1[i])
-                        ak8JetsGoodTau2.append( AK8Tau2[i])
-                        ak8JetsGoodTau3.append( AK8Tau3[i])
-                        ak8JetsGoodNSubJets.append( AK8nSubJets[i])
-                        ak8JetsGoodMinMass.append( AK8minmass[i] )
-                        ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
-                        ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
-                        ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
-                        ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )                        
-                    #} End AK8 Loop
+                    #$ Cuts for fat jets that are far away from the leptons
+                    if SemiLeptonic == True:
+                        dR = jetP4.DeltaR(theLepton ) 
+                        if dR > ROOT.TMath.Pi()/2.0 :
+                            ak8JetsGood.append(AK8P4Corr)
+                            ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
+                            ak8JetsGoodPrunMass.append( AK8PrunedM[i])
+                            ak8JetsGoodFiltMass.append( AK8FilteredM[i])
+                            ak8JetsGoodTau1.append( AK8Tau1[i])
+                            ak8JetsGoodTau2.append( AK8Tau2[i])
+                            ak8JetsGoodTau3.append( AK8Tau3[i])
+                            ak8JetsGoodNSubJets.append( AK8nSubJets[i])
+                            ak8JetsGoodMinMass.append( AK8minmass[i] )
+                            ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
+                            ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
+                            ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
+                            ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )
+                    #$ Cuts for Hadronic channel
+                    else : 
+                        ## HADRONIC CHANNEL CRITERIA 
+
+                        # - minimum mass pairing > 50 GeV
+                        # - number of Subjets >= 3
+                        # - Jet Mass > 100 GeV
+                        if AK8nSubJets[i] >= 3 and AK8minmass[i] > 50 and AK8P4Corr.M() > 100 :
+                            ak8JetsGood.append(AK8P4Corr)
+                            ak8JetsGoodTrimMass.append( AK8TrimmedM[i])
+                            ak8JetsGoodPrunMass.append( AK8PrunedM[i])
+                            ak8JetsGoodFiltMass.append( AK8FilteredM[i])
+                            ak8JetsGoodTau1.append( AK8Tau1[i])
+                            ak8JetsGoodTau2.append( AK8Tau2[i])
+                            ak8JetsGoodTau3.append( AK8Tau3[i])
+                            ak8JetsGoodNSubJets.append( AK8nSubJets[i])
+                            ak8JetsGoodMinMass.append( AK8minmass[i] )
+                            ak8JetsGoodTopSubjetIndex0.append( AK8TopSubjetIndex0[i] )
+                            ak8JetsGoodTopSubjetIndex1.append( AK8TopSubjetIndex1[i] )
+                            ak8JetsGoodTopSubjetIndex2.append( AK8TopSubjetIndex2[i] )
+                            ak8JetsGoodTopSubjetIndex3.append( AK8TopSubjetIndex3[i] )                        
+                        #} End AK8 Loop
 
             #@ Tagging
             if len(ak8JetsGood) < 1 :
