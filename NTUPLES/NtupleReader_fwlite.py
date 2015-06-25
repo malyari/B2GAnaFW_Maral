@@ -388,8 +388,8 @@ h_tau21AK8 = ROOT.TH1F("h_tau21AK8", "AK8 Jet #tau_{2} / #tau_{1};Mass#tau_{21}"
 h_tau32AK8 = ROOT.TH1F("h_tau32AK8", "AK8 Jet #tau_{3} / #tau_{2};Mass#tau_{32}", 100, 0, 1.0)
 
 h_mttMass = ROOT.TH1D("h_mttMass", "mTT Mass", 1000, 0, 5000 )
-h_mttPredDist = ROOT.TH1D("h_mttPredDist", "h_mttPredDist", 1000, 0, 5000)
-mttPredDist = ROOT.PredictedDistribution( h_mttPredDist, "mttPredDist", "mTT Mass", 1000, 0,  5000 )
+h_mistag = ROOT.TH1D("h_mistag", "h_mistag", 1000, 0, 5000)
+mttPredDist = ROOT.PredictedDistribution( h_mistag, "mttPredDist", "mTT Mass", 1000, 0,  5000 )
 ROOT.SetOwnership( mttPredDist, False )
 
 #@ JET CORRECTIONS
@@ -441,15 +441,15 @@ ak8JetCorrector = ROOT.FactorizedJetCorrector(vParJecAK8)
 nbins = 0
 #@ Getting Mistag Rates #!!!
 Fmistag = ROOT.TFile("MistagRatePt.root")
-hmistag = Fmistag.Get("topTagPtSD").Clone()
+h_mistag = Fmistag.Get("topTagPtSD").Clone()
 
-nbins = hmistag.GetNbinsX()
+nbins = h_mistag.GetNbinsX()
 mistags = []
 mistagPtbins = []
 
 for i in xrange( nbins ) :
-    mistagPtbins.append(hmistag.GetBinLowEdge(i))
-    mistags.append(hmistag.GetBinContent(i))
+    mistagPtbins.append(h_mistag.GetBinLowEdge(i))
+    mistags.append(h_mistag.GetBinContent(i))
 def getMistagPtBins(x) :
     for i in xrange( len(mistagPtbins) ) :
         if x >= mistagPtbins[i] and x < mistagPtbins[i+1] :
@@ -1518,21 +1518,22 @@ for ifile in files : #{ Loop over root files
             if len(ak8JetsGoodSDropMass) > 1:
                 topTag0 = ak8JetsGoodSDropMass[0] > 140 and ak8JetsGoodSDropMass[0] < 250 and ak8JetsGoodMinMass[0] > 50 and ak8JetsGoodNSubJets[0] > 2
                 topTag1 = ak8JetsGoodSDropMass[1] > 140 and ak8JetsGoodSDropMass[1] < 250 and ak8JetsGoodMinMass[1] > 50 and ak8JetsGoodNSubJets[1] > 2
-                ttMass = (ak8JetsGood[0]+ak8JetsGood[1]).m()
+                ttMass = (ak8JetsGood[0]+ak8JetsGood[1]).M()
 
-            if topTag0 and topTag1:
-                h_mttMass.Fill( ttMass, FlatWeight )
+                if topTag0 and topTag1:
+                    h_mttMass.Fill( ttMass, FlatWeight )
 
-            if x < 0.5 :
-                if topTag0 :
-                    mttPredDist.Accumulate( ttMass, ak8JetsGood[1].pt(), topTag1, FlatWeight )
+                if x < 0.5 :
+                    if topTag0 :
+                        mttPredDist.Accumulate( ttMass, ak8JetsGood[1].Perp(), topTag1, FlatWeight )
 
-            if x >= 0.5 :
-                if topTag1 :
-                    mttPredDist.Accumulate( ttMass, ak8JetsGood[0].pt(), topTag0, FlatWeight )
+                if x >= 0.5 :
+                    if topTag1 :
+                        mttPredDist.Accumulate( ttMass, ak8JetsGood[0].Perp(), topTag0, FlatWeight )
 
-
-
+                mttPredDist.GetPredictedHist().Write()
+                mttPredDist.GetObservedHist().Write()
+                mttPredDist.GetTaggableHist().Write()    
 
             nttags = 0
             tJets = []
