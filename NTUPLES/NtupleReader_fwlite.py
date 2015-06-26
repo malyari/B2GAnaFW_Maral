@@ -388,8 +388,10 @@ h_tau21AK8 = ROOT.TH1F("h_tau21AK8", "AK8 Jet #tau_{2} / #tau_{1};Mass#tau_{21}"
 h_tau32AK8 = ROOT.TH1F("h_tau32AK8", "AK8 Jet #tau_{3} / #tau_{2};Mass#tau_{32}", 100, 0, 1.0)
 
 h_mttMass = ROOT.TH1D("h_mttMass", "mTT Mass", 1000, 0, 5000 )
-h_mistag = ROOT.TH1D("h_mistag", "h_mistag", 1000, 0, 5000)
-mttPredDist = ROOT.PredictedDistribution( h_mistag, "mttPredDist", "mTT Mass", 1000, 0,  5000 )
+#h_mistag = ROOT.TH1D("h_mistag", "h_mistag", 1000, 0, 5000)
+Fmistag = ROOT.TFile("MistagRatePt.root")
+h_mistag = Fmistag.Get("topTagPtSD").Clone()
+mttPredDist = ROOT.PredictedDistribution( h_mistag, "mttPredDist", "mTT Mass", 1000, 0.0, 5000.0 )
 ROOT.SetOwnership( mttPredDist, False )
 
 #@ JET CORRECTIONS
@@ -440,8 +442,8 @@ ak8JetCorrector = ROOT.FactorizedJetCorrector(vParJecAK8)
 
 nbins = 0
 #@ Getting Mistag Rates #!!!
-Fmistag = ROOT.TFile("MistagRatePt.root")
-h_mistag = Fmistag.Get("topTagPtSD").Clone()
+#Fmistag = ROOT.TFile("MistagRatePt.root")
+#h_mistag = Fmistag.Get("topTagPtSD").Clone()
 
 nbins = h_mistag.GetNbinsX()
 mistags = []
@@ -1530,10 +1532,7 @@ for ifile in files : #{ Loop over root files
                 if x >= 0.5 :
                     if topTag1 :
                         mttPredDist.Accumulate( ttMass, ak8JetsGood[0].Perp(), topTag0, FlatWeight )
-
-                mttPredDist.GetPredictedHist().Write()
-                mttPredDist.GetObservedHist().Write()
-                mttPredDist.GetTaggableHist().Write()    
+ 
 
             nttags = 0
             tJets = []
@@ -1877,4 +1876,7 @@ if DimuonEvents / 1.5 < DieleEvents and DieleEvents / 1.5 < DimuonEvents :
 
 f.cd()
 f.Write()
+mttPredDist.GetPredictedHist().Write()
+mttPredDist.GetObservedHist().Write()
+mttPredDist.GetTaggableHist().Write()   
 f.Close()
