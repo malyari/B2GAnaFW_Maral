@@ -420,12 +420,11 @@ for ifile in files : #{ Loop over root files
         
         # Vertex Sets
         event.getByLabel( l_NPV, h_NPV )
-        NPV = h_NPV.product()[0]
         if len(h_NPV.product()) == 0 :
             if options.verbose :
                 print "Event has no good primary vertex."
             continue
-
+        NPV = h_NPV.product()[0]
         #@ RHO VALUE
         event.getByLabel( l_rho, h_rho )
         if len(h_rho.product()) == 0 :
@@ -549,9 +548,12 @@ for ifile in files : #{ Loop over root files
                 if h_generator.product().hasBinningValues() :
                     pthat = h_generator.product().binningValues()[0]
                     evWeight = 1/pow(pthat/15.,4.5)
-        
+        else :
+            continue
         for ak8Jet in range(0,len(AK8Pt)):
             BadStuff = False
+            if len(AK8Pt) <= 0 or len(AK8Eta) <= 0 or len(AK8Phi) <= 0 or len(AK8Mass) <= 0 :
+                continue
             AK8JECFromB2GAnaFW = AK8JEC[ak8Jet]
             AK8P4Raw = ROOT.TLorentzVector()
             AK8P4Raw.SetPtEtaPhiM( AK8Pt[ak8Jet] , AK8Eta[ak8Jet], AK8Phi[ak8Jet], AK8Mass[ak8Jet])
