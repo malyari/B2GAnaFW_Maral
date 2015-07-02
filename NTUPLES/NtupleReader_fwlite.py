@@ -1520,8 +1520,11 @@ for ifile in files : #{ Loop over root files
             if len(ak8JetsGoodSDropMass) > 1:
                 #topTag0 = ak8JetsGoodSDropMass[0] > 140 and ak8JetsGoodSDropMass[0] < 250 and ak8JetsGoodMinMass[0] > 50 and ak8JetsGoodNSubJets[0] > 2
                 #topTag1 = ak8JetsGoodSDropMass[1] > 140 and ak8JetsGoodSDropMass[1] < 250 and ak8JetsGoodMinMass[1] > 50 and ak8JetsGoodNSubJets[1] > 2
-                topTag0        = ak8JetsGoodSDropMass[0] > 110 and ak8JetsGoodSDropMass[0] < 210 
-                topTag1        = ak8JetsGoodSDropMass[1] > 110 and ak8JetsGoodSDropMass[1] < 210 
+                jet0tau32Val = ak8JetsGoodTau3[0] / ak8JetsGoodTau2[0]
+                jet1tau32Val = ak8JetsGoodTau3[1] / ak8JetsGoodTau2[1]
+
+                topTag0        = ak8JetsGoodSDropMass[0] > 110 and ak8JetsGoodSDropMass[0] < 210 and jet0tau32Val < 0.7
+                topTag1        = ak8JetsGoodSDropMass[1] > 110 and ak8JetsGoodSDropMass[1] < 210 and jet1tau32Val < 0.7
                 ttMass = (ak8JetsGood[0]+ak8JetsGood[1]).M()
 
                 if topTag0 and topTag1:
