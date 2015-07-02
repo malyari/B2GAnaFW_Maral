@@ -832,8 +832,10 @@ for ifile in files : #{ Loop over root files
         bTag0 = .99#jet0_maxB
         bTag1 = .99#jet1_maxB
             
-        topTag0        = ak8JetsGoodSDropMass[0] > 140 and ak8JetsGoodSDropMass[0] < 200 and ak8JetsGoodMinMass[0] > 50 and ak8JetsGoodNSubJets[0] > 2 and jet1tau32Val < 0.7
-        topTag1        = ak8JetsGoodSDropMass[1] > 140 and ak8JetsGoodSDropMass[1] < 200 and ak8JetsGoodMinMass[1] > 50 and ak8JetsGoodNSubJets[1] > 2 and jet2tau32Val < 0.7
+        #topTag0        = ak8JetsGoodSDropMass[0] > 140 and ak8JetsGoodSDropMass[0] < 200 and ak8JetsGoodMinMass[0] > 50 and ak8JetsGoodNSubJets[0] > 2 and jet1tau32Val < 0.7
+        #topTag1        = ak8JetsGoodSDropMass[1] > 140 and ak8JetsGoodSDropMass[1] < 200 and ak8JetsGoodMinMass[1] > 50 and ak8JetsGoodNSubJets[1] > 2 and jet2tau32Val < 0.7
+        topTag0        = ak8JetsGoodSDropMass[0] > 110 and ak8JetsGoodSDropMass[0] < 210 and  jet1tau32Val < 0.7
+        topTag1        = ak8JetsGoodSDropMass[1] > 110 and ak8JetsGoodSDropMass[1] < 210 and  jet2tau32Val < 0.7
 
         AntiTag0SD = ak8JetsGoodSDropMass[0] > 140 and ak8JetsGoodSDropMass[0] < 200# and ak8JetsGoodMinMass[0] < 50 
         AntiTag1SD = ak8JetsGoodSDropMass[1] > 140 and ak8JetsGoodSDropMass[1] < 200# and ak8JetsGoodMinMass[1] < 50
