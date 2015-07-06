@@ -267,7 +267,7 @@ void mistagRate() {
 
     TFile* f_mistagRate = new TFile("MistagRatePt.root" , "UPDATE");// , "RECREATE");
     f_mistagRate->cd();
-    h_mistagrateSD->Write();
+    h_mistagrateSDT->Write();
     leg->Draw();
     c1->Draw();
     c1->SaveAs("mistagRatePlot.png", "png");
