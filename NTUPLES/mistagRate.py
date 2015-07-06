@@ -12,7 +12,7 @@ parser.add_option('--files', type='string', action='store',
                   help='Input files')
 
 parser.add_option('--outname', type='string', action='store',
-                  default='outplots.root',
+                  default='probe_and_tag_hist.root',
                   dest='outname',
                   help='Name of output file')
  
@@ -163,7 +163,7 @@ l_subjetsAK8Mass = ("subjetsCmsTopTag", "subjetCmsTopTagMass")
 
 ## Booking the histograms
 print 'Booking histograms'
-f = ROOT.TFile("probe_and_tag_hist.root", "RECREATE")
+f = ROOT.TFile( options.outname , "RECREATE")
 f.cd()
 
 
