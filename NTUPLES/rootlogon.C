@@ -141,6 +141,7 @@
   // tdrStyle->SetTimeOffset(Double_t toffset);
   // tdrStyle->SetHistMinimumZero(kTRUE);
 
+  gROOT->ForceStyle();
   tdrStyle->cd();
 
 }
